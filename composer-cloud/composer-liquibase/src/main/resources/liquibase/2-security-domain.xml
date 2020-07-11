@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	<!-- added new role-based authorization tables and views -->
+	<changeSet author="skyglass" id="addCommonRoleBasedAuthorizationTables-2">
+
+
+		<createTable tableName="OPERATION">
+			<column name="UUID" type="NVARCHAR(255)">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="PARENT_UUID" type="NVARCHAR(255)"/>
+			<column name="NAME" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addUniqueConstraint columnNames="NAME" constraintName="unique_operation" disabled="false" tableName="OPERATION"/>
+ 	    <addForeignKeyConstraint baseColumnNames="PARENT_UUID" baseTableName="OPERATION" constraintName="operation_parent_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="OPERATION" />  		
+
+		<createTable tableName="ROLE">
+			<column name="UUID" type="NVARCHAR(255)">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="PARENT_UUID" type="NVARCHAR(255)"/>
+			<column name="NAME" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addUniqueConstraint columnNames="NAME" constraintName="composite_unique_role" disabled="false" tableName="ROLE"/>
+ 	    <addForeignKeyConstraint baseColumnNames="PARENT_UUID" baseTableName="ROLE" constraintName="role_parent_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="ROLE" />  		
+
+	</changeSet>
+	
+	<changeSet author="skyglass" id="addSpecialAuthorizationSql-2" dbms="h2">
+
+		<createTable tableName="OPERATION_HIERARCHYVIEW">
+			<column name="UUID" type="NVARCHAR(1)"/>
+			<column name="CHILD_UUID" type="NVARCHAR(255)"/>
+			<column name="PARENT_UUID" type="NVARCHAR(255)"/>
+			<column name="NAME" type="NVARCHAR(255)"/>
+		</createTable>
+		
+ 	    <addForeignKeyConstraint baseColumnNames="CHILD_UUID" baseTableName="OPERATION_HIERARCHYVIEW" constraintName="operation_hierarchyView_child_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="OPERATION" /> 		
+ 	    <addForeignKeyConstraint baseColumnNames="PARENT_UUID" baseTableName="OPERATION_HIERARCHYVIEW" constraintName="operation_hierarchyView_parent_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="OPERATION" /> 
+	    <createIndex  tableName="OPERATION_HIERARCHYVIEW" indexName="operation_hierarchyView_name_idx" unique="false">  
+	        <column  name="NAME"/>
+	    </createIndex>	 	    		
+
+		<createTable tableName="ROLE_HIERARCHYVIEW">
+			<column name="UUID" type="NVARCHAR(1)"/>
+			<column name="CHILD_UUID" type="NVARCHAR(255)"/>
+			<column name="PARENT_UUID" type="NVARCHAR(255)"/>
+			<column name="NAME" type="NVARCHAR(255)"/>
+		</createTable>
+		
+ 	    <addForeignKeyConstraint baseColumnNames="CHILD_UUID" baseTableName="ROLE_HIERARCHYVIEW" constraintName="role_hierarchyView_child_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="ROLE" /> 		
+ 	    <addForeignKeyConstraint baseColumnNames="PARENT_UUID" baseTableName="ROLE_HIERARCHYVIEW" constraintName="role_hierarchyView_parent_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="ROLE" /> 
+	    <createIndex  tableName="ROLE_HIERARCHYVIEW" indexName="role_hierarchyView_name_idx" unique="false">  
+	        <column  name="NAME"/>
+	    </createIndex>		    		
+
+	</changeSet>	
+
+
+	<changeSet author="skyglass" id="addSpecialAuthorizationSql-2" dbms="postgresql">
+
+		<createView viewName="OPERATION_HIERARCHYVIEW">
+		            WITH RECURSIVE HIERARCHY(UUID, CHILD_UUID, PARENT_UUID, NAME) 
+		            
+		            AS (
+		            
+		            SELECT
+		            1 as UUID, o1.UUID as CHILD_UUID, o2.UUID as PARENT_UUID, o2.NAME as NAME FROM OPERATION o1 JOIN OPERATION o2 ON o1.PARENT_UUID = o2.UUID
+		            UNION ALL
+		            SELECT 1 as UUID, o.UUID as CHILD_UUID, h.PARENT_UUID as PARENT_UUID, h.NAME as NAME
+		            FROM HIERARCHY h JOIN OPERATION o
+		            on h.CHILD_UUID = o.PARENT_UUID
+		            
+		            )
+		            
+		            SELECT  1 as UUID, h.CHILD_UUID, h.PARENT_UUID, h.NAME FROM HIERARCHY h
+		            UNION ALL
+		                SELECT 1 as UUID, o.UUID as CHILD_UUID, o.UUID as PARENT_UUID, o.NAME as NAME FROM OPERATION o
+		   </createView>
+
+
+		<createView viewName="ROLE_HIERARCHYVIEW">
+		            WITH RECURSIVE HIERARCHY(UUID, CHILD_UUID, PARENT_UUID, NAME) 
+		            
+		            AS (
+		            
+		            SELECT
+		            1 as UUID, r1.UUID as CHILD_UUID, r2.UUID as PARENT_UUID, r2.NAME as NAME FROM ROLE r1 JOIN ROLE r2 ON r1.PARENT_UUID = r2.UUID
+		            UNION ALL
+		            SELECT 1 as UUID, r.UUID as CHILD_UUID, h.PARENT_UUID as PARENT_UUID, h.NAME as NAME
+		            FROM HIERARCHY h JOIN ROLE r
+		            on h.CHILD_UUID = r.PARENT_UUID
+		            
+		            )
+		            
+		            SELECT  1 as UUID, h.CHILD_UUID, h.PARENT_UUID, h.NAME FROM HIERARCHY h
+		            UNION ALL
+		                SELECT 1 as UUID, r.UUID as CHILD_UUID, r.UUID as PARENT_UUID, r.NAME as NAME FROM ROLE r
+		   </createView>
+
+	</changeSet>
+	
+	<changeSet author="skyglass" id="addOperationValues">
+	
+		<sql>
+			INSERT INTO OPERATION (UUID, NAME) VALUES ('acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Write');
+			INSERT INTO OPERATION (UUID, PARENT_UUID, NAME) VALUES ('acc58c84-ec3b-11e9-81b4-2a2ae2dbcce4', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Read');
+			INSERT INTO OPERATION (UUID, PARENT_UUID, NAME) VALUES ('73e58e24-4ffe-11ea-b77f-2e728ce88125', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Create');
+			INSERT INTO OPERATION (UUID, PARENT_UUID, NAME) VALUES ('89dabcae-4ffe-11ea-b77f-2e728ce88125', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Update');
+			INSERT INTO OPERATION (UUID, PARENT_UUID, NAME) VALUES ('9565ff52-4ffe-11ea-b77f-2e728ce88125', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Delete');
+			INSERT INTO OPERATION (UUID, PARENT_UUID, NAME) VALUES ('8cfc4044-c085-4efb-9e17-43982e766631', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'ChangeOwner');
+		</sql>
+		
+	</changeSet>	
+
+
+	<changeSet author="skyglass" id="addRoleBasedAuthorizationTables2-2">
+	
+		<createTable tableName="ROLEPERMISSION">
+			<column name="UUID" type="NVARCHAR(255)">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="ROLE_UUID" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="RESOURCETYPE" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="OPERATION_UUID" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addUniqueConstraint columnNames="ROLE_UUID, RESOURCETYPE, OPERATION_UUID" constraintName="composite_unique_role_permission" disabled="false" tableName="ROLEPERMISSION"/>
+	    <createIndex  tableName="ROLEPERMISSION" indexName="rolePermission_resourceType_idx" unique="false">  
+	        <column  name="RESOURCETYPE"/>
+	    </createIndex>		
+ 	    <addForeignKeyConstraint baseColumnNames="ROLE_UUID" baseTableName="ROLEPERMISSION" constraintName="rolePermission_role_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="ROLE" />	
+ 	    <addForeignKeyConstraint baseColumnNames="OPERATION_UUID" baseTableName="ROLEPERMISSION" constraintName="rolePermission_operation_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="OPERATION" /> 	    	
+
+		<createTable tableName="USERCONTEXTPERMISSION">
+			<column name="UUID" type="NVARCHAR(255)">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="USER_UUID" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CONTEXT_UUID" type="NVARCHAR(255)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="CONTEXTTYPE" type="NVARCHAR(64)">
+				<constraints nullable="true"/>
+			</column>			
+			<column name="RELATION" type="NVARCHAR(64)">
+				<constraints nullable="true"/>
+			</column>			
+			<column name="RESOURCE_UUID" type="NVARCHAR(255)">
+				<constraints nullable="true"/>
+			</column>		
+			<column name="OWNER_UUID" type="NVARCHAR(255)">
+				<constraints nullable="true"/>
+			</column>				
+			<column name="RESOURCETYPE" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>			
+			<column name="OPERATION_UUID" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addUniqueConstraint columnNames="USER_UUID, CONTEXT_UUID, RELATION, RESOURCE_UUID, RESOURCETYPE, OWNER_UUID, OPERATION_UUID" constraintName="composite_unique_user_context_permission" disabled="false" tableName="USERCONTEXTPERMISSION"/>
+	    <createIndex  tableName="USERCONTEXTPERMISSION" indexName="userContextPermission_contextType_idx" unique="false">  
+	        <column  name="CONTEXTTYPE"/>
+	    </createIndex>	
+	    <createIndex  tableName="USERCONTEXTPERMISSION" indexName="userContextPermission_relation_idx" unique="false">  
+	        <column  name="RELATION"/>
+	    </createIndex>	
+	    <createIndex  tableName="USERCONTEXTPERMISSION" indexName="userContextPermission_resourceType_idx" unique="false">  
+	        <column  name="RESOURCETYPE"/>
+	    </createIndex>
+	    <createIndex  tableName="USERCONTEXTPERMISSION" indexName="userContextPermission_context_uuid_idx" unique="false">  
+	        <column  name="CONTEXT_UUID"/>
+	    </createIndex>
+	    <createIndex  tableName="USERCONTEXTPERMISSION" indexName="userContextPermission_resource_uuid_idx" unique="false">  
+	        <column  name="RESOURCE_UUID"/>
+	    </createIndex>		    		    		    	    	
+ 	    <addForeignKeyConstraint baseColumnNames="USER_UUID" baseTableName="USERCONTEXTPERMISSION" constraintName="userContextPermission_user_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="USER" />	
+ 	    <addForeignKeyConstraint baseColumnNames="OWNER_UUID" baseTableName="USERCONTEXTPERMISSION" constraintName="userContextPermission_owner_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSOWNER" /> 
+ 	    <addForeignKeyConstraint baseColumnNames="OPERATION_UUID" baseTableName="USERCONTEXTPERMISSION" constraintName="userContextPermission_operation_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="OPERATION" />  	    		
+
+		<createTable tableName="USERCONTEXTROLE">
+			<column name="UUID" type="NVARCHAR(255)">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="USER_UUID" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CONTEXT_UUID" type="NVARCHAR(255)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="CONTEXTTYPE" type="NVARCHAR(64)">
+				<constraints nullable="true"/>
+			</column>				
+			<column name="RELATION" type="NVARCHAR(64)">
+				<constraints nullable="true"/>
+			</column>			
+			<column name="RESOURCE_UUID" type="NVARCHAR(255)">
+				<constraints nullable="true"/>
+			</column>	
+			<column name="OWNER_UUID" type="NVARCHAR(255)">
+				<constraints nullable="true"/>
+			</column>						
+			<column name="ROLE_UUID" type="NVARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addUniqueConstraint columnNames="USER_UUID, CONTEXT_UUID, RELATION, RESOURCE_UUID, OWNER_UUID, ROLE_UUID" constraintName="composite_unique_user_context_role" disabled="false" tableName="USERCONTEXTROLE"/>
+	    <createIndex  tableName="USERCONTEXTROLE" indexName="userContextRole_contextType_idx" unique="false">  
+	        <column  name="CONTEXTTYPE"/>
+	    </createIndex>	
+	    <createIndex  tableName="USERCONTEXTROLE" indexName="userContextRole_relation_idx" unique="false">  
+	        <column  name="RELATION"/>
+	    </createIndex>	
+	    <createIndex  tableName="USERCONTEXTROLE" indexName="userContextRole_context_uuid_idx" unique="false">  
+	        <column  name="CONTEXT_UUID"/>
+	    </createIndex>
+	    <createIndex  tableName="USERCONTEXTROLE" indexName="userContextRole_resource_uuid_idx" unique="false">  
+	        <column  name="RESOURCE_UUID"/>
+	    </createIndex>		    		    		    	    	
+ 	    <addForeignKeyConstraint baseColumnNames="USER_UUID" baseTableName="USERCONTEXTROLE" constraintName="userContextRole_user_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="USER" />	
+ 	    <addForeignKeyConstraint baseColumnNames="OWNER_UUID" baseTableName="USERCONTEXTROLE" constraintName="userContextRole_owner_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSOWNER" /> 
+ 	    <addForeignKeyConstraint baseColumnNames="ROLE_UUID" baseTableName="USERCONTEXTROLE" constraintName="userContextRole_role_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="ROLE" />  		
+
+		<createView viewName="CONTEXT_HIERARCHYVIEW">SELECT
+	             ouhv.UUID as UUID,
+	             ouhv.CHILD_UUID as CHILD_UUID,
+	             ouhv.PARENT_UUID as PARENT_UUID,		             	             
+	             oov.OWNER_UUID as OWNER_UUID	              
+	             FROM BUSINESSUNIT_HIERARCHYVIEW ouhv 
+	             INNER JOIN BUSINESSUNIT oov ON ouhv.CHILD_UUID = oov.UUID
+	             
+	             UNION SELECT	
+	             
+	             ouhv.UUID as UUID,
+	             ouhv.CHILD_UUID as CHILD_UUID,
+	             ouhv.PARENT_UUID as PARENT_UUID,		             	             
+	             oov.CONTEXTOWNER_UUID as OWNER_UUID	              
+	             FROM BUSINESSCONTEXT_HIERARCHYVIEW ouhv 
+	             INNER JOIN BUSINESSCONTEXT oov ON ouhv.CHILD_UUID = oov.UUID	                          
+	    </createView>	
+
+
+
+		<createView viewName="ROLEPERMISSIONVIEW">SELECT DISTINCT
+	             1 AS UUID,
+	             rhv.PARENT_UUID as ROLE_UUID,
+	             rp.RESOURCETYPE as RESOURCETYPE,
+	             ophv.CHILD_UUID as OPERATION_UUID 
+	             FROM ROLEPERMISSION rp 
+	             INNER JOIN ROLE_HIERARCHYVIEW rhv ON rp.ROLE_UUID = rhv.CHILD_UUID
+	             INNER JOIN OPERATION_HIERARCHYVIEW ophv ON rp.OPERATION_UUID = ophv.PARENT_UUID             
+	    </createView>
+	    
+	    
+		<sql>
+			CREATE MATERIALIZED VIEW USERRESOURCEPERMISSIONVIEW AS SELECT
+				 1 AS UUID,	             
+	             ucp.USER_UUID as USER_UUID,
+	             ucp.CONTEXT_UUID as CONTEXT_UUID,
+	             ucp.CONTEXTTYPE as CONTEXTTYPE,   	             
+	             ucp.RELATION as RELATION,
+	             ucp.RESOURCE_UUID as RESOURCE_UUID,
+	             ucp.OWNER_UUID as OWNER_UUID,
+	             ucp.RESOURCETYPE as RESOURCETYPE,
+	             ophv.CHILD_UUID as OPERATION_UUID
+	             
+	             FROM USERCONTEXTPERMISSION ucp
+	             INNER JOIN OPERATION_HIERARCHYVIEW ophv ON ucp.OPERATION_UUID = ophv.PARENT_UUID
+	           	 WHERE ucp.RESOURCE_UUID IS NOT NULL
+	           	 
+	             UNION SELECT
+	             
+	             1 AS UUID,
+	             ucr.USER_UUID as USER_UUID,
+	             ucr.CONTEXT_UUID as CONTEXT_UUID,	
+	             ucr.CONTEXTTYPE as CONTEXTTYPE,             
+	             ucr.RELATION as RELATION,	             
+	             ucr.RESOURCE_UUID as RESOURCE_UUID,	
+	             ucr.OWNER_UUID as OWNER_UUID,		                                     
+	             rpv.RESOURCETYPE as RESOURCETYPE,
+	             rpv.OPERATION_UUID as OPERATION_UUID
+	             
+	             FROM             
+	             
+	           	 USERCONTEXTROLE ucr
+	             INNER JOIN ROLEPERMISSIONVIEW rpv ON ucr.ROLE_UUID = rpv.ROLE_UUID
+	             AND ucr.RESOURCE_UUID IS NOT NULL
+	             LEFT JOIN USERCONTEXTPERMISSION ucp
+	             ON ucp.USER_UUID = ucr.USER_UUID AND ucp.RESOURCETYPE = rpv.RESOURCETYPE
+	             AND ucp.RESOURCE_UUID = ucr.RESOURCE_UUID
+	             WHERE ucp.USER_UUID IS NULL
+	             
+	    </sql>	
+	    
+		<addUniqueConstraint columnNames="USER_UUID, CONTEXT_UUID, RELATION, RESOURCE_UUID, OWNER_UUID, RESOURCETYPE, OPERATION_UUID" constraintName="composite_unique_user_resource_permission_view" disabled="false" tableName="USERRESOURCEPERMISSIONVIEW"/>	    		    		    	    	
+ 
+	    
+	    
+	    	    
+	    
+		<createView viewName="USERGLOBALPERMISSIONVIEW">SELECT
+				 1 AS UUID,	             
+	             ucp.USER_UUID as USER_UUID,
+	             ucp.RELATION as RELATION,
+	             ucp.RESOURCE_UUID as RESOURCE_UUID,
+	             ucp.OWNER_UUID as OWNER_UUID,
+	             ucp.RESOURCETYPE as RESOURCETYPE,
+	             ophv.CHILD_UUID as OPERATION_UUID
+	             
+	             FROM             
+	             
+	             USERCONTEXTPERMISSION ucp
+	             INNER JOIN OPERATION_HIERARCHYVIEW ophv ON ucp.OPERATION_UUID = ophv.PARENT_UUID
+	           	 AND ucp.CONTEXT_UUID IS NULL
+	           	 
+	             UNION SELECT
+	             
+	             1 AS UUID,
+	             ucr.USER_UUID as USER_UUID,
+	             ucr.RELATION as RELATION,	             
+	             ucr.RESOURCE_UUID as RESOURCE_UUID,	
+	             ucr.OWNER_UUID as OWNER_UUID,		                                     
+	             rpv.RESOURCETYPE as RESOURCETYPE,
+	             rpv.OPERATION_UUID as OPERATION_UUID
+	             
+	             FROM             
+	             
+	           	 USERCONTEXTROLE ucr
+	             INNER JOIN ROLEPERMISSIONVIEW rpv ON ucr.ROLE_UUID = rpv.ROLE_UUID
+	             AND ucr.CONTEXT_UUID IS NULL
+	             LEFT JOIN USERCONTEXTPERMISSION ucp ON ucp.USER_UUID = ucr.USER_UUID 
+	             AND ucp.CONTEXT_UUID IS NULL
+	             AND ((ucp.RELATION IS NULL AND ucr.RELATION IS NULL) OR ucp.RELATION = ucr.RELATION) 	             
+	             AND ((ucp.RESOURCE_UUID IS NULL AND ucr.RESOURCE_UUID IS NULL) OR ucp.RESOURCE_UUID = ucr.RESOURCE_UUID) 	
+	             AND ((ucp.OWNER_UUID IS NULL AND ucr.OWNER_UUID IS NULL) OR ucp.OWNER_UUID = ucr.OWNER_UUID) 	 	                          
+	             AND ucp.RESOURCETYPE = rpv.RESOURCETYPE
+	             WHERE ucp.USER_UUID IS NULL
+	             
+	    </createView>	
+	    
+		<createView viewName="USERCONTEXTPERMISSIONBASICVIEW">SELECT
+				 1 AS UUID,		             
+	             ucp.USER_UUID as USER_UUID,
+	             ouhv.CHILD_UUID as CONTEXT_UUID,
+	             ucp.CONTEXTTYPE as CONTEXTTYPE,	             
+	             ucp.RELATION as RELATION,	             
+	             ucp.RESOURCE_UUID as RESOURCE_UUID,	
+	             ucp.OWNER_UUID as OWNER_UUID,	                                     
+	             ucp.RESOURCETYPE as RESOURCETYPE,
+	             ophv.CHILD_UUID as OPERATION_UUID
+	             
+	             FROM             
+	             
+	             USERCONTEXTPERMISSION ucp
+	             INNER JOIN OPERATION_HIERARCHYVIEW ophv ON ucp.OPERATION_UUID = ophv.PARENT_UUID
+	           	 INNER JOIN CONTEXT_HIERARCHYVIEW ouhv ON ucp.CONTEXT_UUID = ouhv.PARENT_UUID 	
+	           	 
+	             UNION SELECT
+
+				 1 AS UUID,
+	             ucr.USER_UUID as USER_UUID,
+	             ouhv.CHILD_UUID as CONTEXT_UUID,
+	             ucr.CONTEXTTYPE as CONTEXTTYPE,
+	             ucr.RELATION as RELATION,
+	             ucr.RESOURCE_UUID as RESOURCE_UUID,
+	             ucr.OWNER_UUID as OWNER_UUID,
+	             rpv.RESOURCETYPE as RESOURCETYPE,
+	             rpv.OPERATION_UUID as OPERATION_UUID
+	             
+	           	 FROM USERCONTEXTROLE ucr
+	           	 INNER JOIN CONTEXT_HIERARCHYVIEW ouhv ON ouhv.PARENT_UUID = ucr.CONTEXT_UUID
+	             INNER JOIN ROLEPERMISSIONVIEW rpv ON ucr.ROLE_UUID = rpv.ROLE_UUID
+	             LEFT JOIN USERCONTEXTPERMISSION ucp ON ucp.USER_UUID = ucr.USER_UUID AND ucp.CONTEXT_UUID = ouhv.CHILD_UUID
+	             AND ((ucp.RELATION IS NULL AND ucr.RELATION IS NULL) OR ucp.RELATION = ucr.RELATION)
+	             AND ((ucp.RESOURCE_UUID IS NULL AND ucr.RESOURCE_UUID IS NULL) OR ucp.RESOURCE_UUID = ucr.RESOURCE_UUID)
+	             AND ((ucp.OWNER_UUID IS NULL AND ucr.OWNER_UUID IS NULL) OR ucp.OWNER_UUID = ucr.OWNER_UUID) 	             	             
+	             AND ucp.RESOURCETYPE = rpv.RESOURCETYPE
+	             WHERE ucp.USER_UUID IS NULL
+        
+	    </createView>
+  
+
+		<createView viewName="USERCONTEXTPERMISSIONVIEW">SELECT
+				 1 as UUID,
+	             ucpbv.USER_UUID as USER_UUID,
+	             ucpbv.CONTEXT_UUID as CONTEXT_UUID,
+	             ucpbv.CONTEXTTYPE as CONTEXTTYPE,	             
+	             ucpbv.RELATION as RELATION,	             
+	             ucpbv.RESOURCE_UUID as RESOURCE_UUID,	
+	             ucpbv.OWNER_UUID as OWNER_UUID,	                                     
+	             ucpbv.RESOURCETYPE as RESOURCETYPE,
+	             ucpbv.OPERATION_UUID as OPERATION_UUID,
+	             op.NAME as OPERATION_NAME
+	             
+	             FROM             
+	             
+	             USERCONTEXTPERMISSIONBASICVIEW ucpbv
+	             JOIN Operation op ON op.uuid = ucpbv.operation_uuid
+	             
+	             UNION SELECT 
+	             
+	             1 AS UUID,
+	             ugp.USER_UUID as USER_UUID,
+	             NULL as CONTEXT_UUID,
+	             NULL as CONTEXTTYPE,	             
+	             ugp.RELATION as RELATION,	             
+	             ugp.RESOURCE_UUID as RESOURCE_UUID,	
+             	 ugp.OWNER_UUID as OWNER_UUID,	             	                         
+	             ugp.RESOURCETYPE as RESOURCETYPE,
+	             ugp.OPERATION_UUID as OPERATION_UUID,
+	             op.NAME as OPERATION_NAME
+	             
+	             FROM   
+	             
+	             USERGLOBALPERMISSIONVIEW ugp
+	             JOIN Operation op ON op.uuid = ugp.operation_uuid	             
+	             LEFT JOIN USERCONTEXTPERMISSIONBASICVIEW ucpbv ON ugp.USER_UUID = ucpbv.USER_UUID
+	             AND ((ugp.RELATION IS NULL AND ucpbv.RELATION IS NULL) OR ugp.RELATION = ucpbv.RELATION) 	             
+	             AND ((ugp.RESOURCE_UUID IS NULL AND ucpbv.RESOURCE_UUID IS NULL) OR ugp.RESOURCE_UUID = ucpbv.RESOURCE_UUID) 
+	             AND ((ugp.OWNER_UUID IS NULL AND ucpbv.OWNER_UUID IS NULL) OR ugp.OWNER_UUID = ucpbv.OWNER_UUID) 	             
+	             AND ugp.RESOURCETYPE = ucpbv.RESOURCETYPE
+	             WHERE ucpbv.USER_UUID IS NULL
+	             
+	    </createView>
+
+
+	</changeSet>
+
+
+
+
+
+	<changeSet author="skyglass" id="addSpecialAuthorizationHierarchyDataSql-201905071438" dbms="h2">
+
+		<sql>
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Write');
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', 'acc58c84-ec3b-11e9-81b4-2a2ae2dbcce4', 'acc58c84-ec3b-11e9-81b4-2a2ae2dbcce4', 'Read');
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', 'acc58c84-ec3b-11e9-81b4-2a2ae2dbcce4', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Read');
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', '73e58e24-4ffe-11ea-b77f-2e728ce88125', '73e58e24-4ffe-11ea-b77f-2e728ce88125', 'Create');
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', '73e58e24-4ffe-11ea-b77f-2e728ce88125', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Create');
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', '89dabcae-4ffe-11ea-b77f-2e728ce88125', '89dabcae-4ffe-11ea-b77f-2e728ce88125', 'Update');	
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', '89dabcae-4ffe-11ea-b77f-2e728ce88125', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Update');					
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', '9565ff52-4ffe-11ea-b77f-2e728ce88125', '9565ff52-4ffe-11ea-b77f-2e728ce88125', 'Delete');	
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', '9565ff52-4ffe-11ea-b77f-2e728ce88125', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'Delete');	
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', '8cfc4044-c085-4efb-9e17-43982e766631', '8cfc4044-c085-4efb-9e17-43982e766631', 'ChangeOwner');	
+			INSERT INTO OPERATION_HIERARCHYVIEW (UUID, CHILD_UUID, PARENT_UUID, NAME) values ('1', '8cfc4044-c085-4efb-9e17-43982e766631', 'acc589d2-ec3b-11e9-81b4-2a2ae2dbcce4', 'ChangeOwner');											
+		</sql>
+
+	</changeSet>
+
+</databaseChangeLog>

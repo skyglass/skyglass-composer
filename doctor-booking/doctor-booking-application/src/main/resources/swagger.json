@@ -1,0 +1,530 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "1.1.1",
+    "title" : "My API"
+  },
+  "host" : "127.0.0.1:8080",
+  "basePath" : "/",
+  "tags" : [ {
+    "name" : "appointments",
+    "description" : "the appointments API"
+  }, {
+    "name" : "doctors",
+    "description" : "the doctors API"
+  }, {
+    "name" : "patients",
+    "description" : "the patients API"
+  }, {
+    "name" : "slots",
+    "description" : "the slots API"
+  } ],
+  "schemes" : [ "http" ],
+  "paths" : {
+    "/appointments/" : {
+      "post" : {
+        "tags" : [ "appointments" ],
+        "summary" : "Add a new appointment for given patient and appointment slot",
+        "description" : "",
+        "operationId" : "createAppointment",
+        "consumes" : [ "application/xml" ],
+        "produces" : [ "application/xml" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Details of Appointment",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/AppointmentDto"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/AppointmentDto"
+            }
+          },
+          "201" : {
+            "description" : "Created Appointment ",
+            "schema" : {
+              "$ref" : "#/definitions/AppointmentDto"
+            }
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/doctors/" : {
+      "get" : {
+        "tags" : [ "doctors" ],
+        "summary" : "Retrieve all doctors",
+        "description" : "",
+        "operationId" : "getAllDoctors",
+        "produces" : [ "application/xml" ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully retrieved Doctors",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/DoctorDto"
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Doctor with specified ID not found"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "doctors" ],
+        "summary" : "Add a new doctor to Medical Clinic",
+        "description" : "",
+        "operationId" : "createDoctor",
+        "consumes" : [ "application/xml", "application/json" ],
+        "produces" : [ "application/xml", "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Doctor object that needs to be added to the clinic",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/DoctorDto"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/DoctorDto"
+            }
+          },
+          "201" : {
+            "description" : "Created Doctor",
+            "schema" : {
+              "$ref" : "#/definitions/DoctorDto"
+            }
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/doctors/{id}" : {
+      "get" : {
+        "tags" : [ "doctors" ],
+        "summary" : "Retrieve existing doctor information",
+        "description" : "",
+        "operationId" : "getDoctor",
+        "produces" : [ "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id of doctor that needs to be retrieved",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully retrieved Doctor",
+            "schema" : {
+              "$ref" : "#/definitions/DoctorDto"
+            }
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Doctor with specified ID not found"
+          }
+        }
+      }
+    },
+    "/patients/" : {
+      "post" : {
+        "tags" : [ "patients" ],
+        "summary" : "Add a new patient to Medical Clinic",
+        "description" : "",
+        "operationId" : "createPatient",
+        "consumes" : [ "application/xml" ],
+        "produces" : [ "application/xml" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Patient object that needs to be added to the clinic",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/PatientDto"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Created Patient",
+            "schema" : {
+              "$ref" : "#/definitions/PatientDto"
+            }
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/patients/{id}" : {
+      "get" : {
+        "tags" : [ "patients" ],
+        "summary" : "Retrieve existing patient information",
+        "description" : "",
+        "operationId" : "getPatient",
+        "produces" : [ "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id of patient that needs to be retrieved",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully retrieved Patient",
+            "schema" : {
+              "$ref" : "#/definitions/PatientDto"
+            }
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "PAtient with specified ID not found"
+          }
+        }
+      }
+    },
+    "/slots/" : {
+      "get" : {
+        "tags" : [ "slots" ],
+        "summary" : "Retrieve all appointment slots for given doctor in specified dates",
+        "description" : "",
+        "operationId" : "getSlots",
+        "produces" : [ "application/xml" ],
+        "parameters" : [ {
+          "name" : "doctorId",
+          "in" : "query",
+          "description" : "Id of doctor for whom appointments to retrieve",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        }, {
+          "name" : "startDate",
+          "in" : "query",
+          "description" : "Slots after this date will be retrieved",
+          "required" : true,
+          "type" : "string",
+          "format" : "date-time"
+        }, {
+          "name" : "endDate",
+          "in" : "query",
+          "description" : "Slots up to this date will be retrieved",
+          "required" : true,
+          "type" : "string",
+          "format" : "date-time"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully retrieved appointment slots",
+            "schema" : {
+              "$ref" : "#/definitions/AppointmentSlotCollectionDto"
+            }
+          },
+          "400" : {
+            "description" : "Invalid data supplied"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "slots" ],
+        "summary" : "Add a new appointment slot at given date for specified doctor",
+        "description" : "",
+        "operationId" : "createSlot",
+        "consumes" : [ "application/xml" ],
+        "produces" : [ "application/xml" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Details of Appointment",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/AppointmentSlotDto"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/AppointmentSlotDto"
+            }
+          },
+          "201" : {
+            "description" : "Created Appointment Slot ",
+            "schema" : {
+              "$ref" : "#/definitions/AppointmentSlotDto"
+            }
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/slots/{id}" : {
+      "get" : {
+        "tags" : [ "slots" ],
+        "summary" : "Retrieve existing Appointment Slot by Id",
+        "description" : "",
+        "operationId" : "getSlotById",
+        "produces" : [ "application/xml" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Appointment Slot id",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully retrieved Appointment Slot",
+            "schema" : {
+              "$ref" : "#/definitions/AppointmentSlotDto"
+            }
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Appointment Slot with specified ID not found"
+          }
+        }
+      }
+    },
+    "/swagger-resources" : {
+      "get" : {
+        "operationId" : "swaggerResources",
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    },
+    "/swagger-resources/configuration/security" : {
+      "get" : {
+        "operationId" : "swagerSecurityConfig",
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    },
+    "/swagger-resources/configuration/ui" : {
+      "get" : {
+        "operationId" : "swaggerUiConfig",
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    },
+    "/v2/api-docs" : {
+      "get" : {
+        "operationId" : "apiJsonEndpoint",
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Resource"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "AppointmentDto" : {
+      "type" : "object",
+      "properties" : {
+        "entityId" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "patientId" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "appointmentSlotId" : {
+          "type" : "integer",
+          "format" : "int64"
+        }
+      },
+      "xml" : {
+        "name" : "AppointmentDto"
+      }
+    },
+    "AppointmentSlotCollectionDto" : {
+      "type" : "object",
+      "properties" : {
+        "appointmentSlotDtoList" : {
+          "type" : "array",
+          "xml" : {
+            "name" : "AppointmentSlotCollection"
+          },
+          "items" : {
+            "xml" : {
+              "name" : "AppointmentSlotCollection"
+            },
+            "$ref" : "#/definitions/AppointmentSlotDto"
+          }
+        },
+        "links" : {
+          "readOnly" : true,
+          "$ref" : "#/definitions/Links"
+        }
+      },
+      "xml" : {
+        "name" : "AppointmentSlotCollectionDto"
+      }
+    },
+    "AppointmentSlotDto" : {
+      "type" : "object",
+      "properties" : {
+        "entityId" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "doctorId" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "startTime" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "endTime" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "links" : {
+          "readOnly" : true,
+          "$ref" : "#/definitions/Links"
+        }
+      },
+      "xml" : {
+        "name" : "AppointmentSlotDto"
+      }
+    },
+    "DoctorDto" : {
+      "type" : "object",
+      "properties" : {
+        "entityId" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "links" : {
+          "readOnly" : true,
+          "$ref" : "#/definitions/Links"
+        }
+      },
+      "xml" : {
+        "name" : "DoctorDto"
+      }
+    },
+    "InputStream" : {
+      "type" : "object"
+    },
+    "Links" : {
+      "type" : "object",
+      "properties" : {
+        "empty" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "PatientDto" : {
+      "type" : "object",
+      "properties" : {
+        "entityId" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "links" : {
+          "readOnly" : true,
+          "$ref" : "#/definitions/Links"
+        }
+      },
+      "xml" : {
+        "name" : "PatientDto"
+      }
+    },
+    "Resource" : {
+      "type" : "object",
+      "properties" : {
+        "url" : {
+          "type" : "string",
+          "format" : "url"
+        },
+        "file" : {
+          "type" : "file"
+        },
+        "open" : {
+          "type" : "boolean"
+        },
+        "readable" : {
+          "type" : "boolean"
+        },
+        "uri" : {
+          "type" : "string",
+          "format" : "uri"
+        },
+        "description" : {
+          "type" : "string"
+        },
+        "filename" : {
+          "type" : "string"
+        },
+        "inputStream" : {
+          "$ref" : "#/definitions/InputStream"
+        }
+      }
+    }
+  }
+}

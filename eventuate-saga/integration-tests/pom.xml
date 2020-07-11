@@ -1,0 +1,102 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>integration-tests</artifactId>
+
+    <parent>
+        <groupId>skyglass.composer</groupId>
+        <artifactId>eventuate-saga</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+	<dependencies>
+	
+        <dependency>
+            <groupId>skyglass.composer</groupId>
+            <artifactId>customer-backend</artifactId>
+            <version>${project.version}</version>            
+        </dependency>
+		
+        <dependency>
+            <groupId>skyglass.composer</groupId>
+            <artifactId>order-backend</artifactId>
+            <version>${project.version}</version>            
+        </dependency>		
+
+		<dependency>
+		  <groupId>org.springframework.boot</groupId>
+		  <artifactId>spring-boot-starter-test</artifactId>
+		  <scope>test</scope>		  
+		
+		  <exclusions>
+		    <exclusion>
+		      <groupId>junit</groupId>
+		      <artifactId>junit</artifactId>
+		    </exclusion>
+		  </exclusions>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.springframework.cloud</groupId>
+		    <artifactId>spring-cloud-starter</artifactId>
+		    <scope>test</scope>
+		</dependency>
+		
+
+	
+		
+		<!-- Eventuate Tram -->
+		<dependency>
+			<groupId>io.eventuate.tram.core</groupId>
+			<artifactId>eventuate-tram-in-memory</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>io.eventuate.tram.sagas</groupId>
+			<artifactId>eventuate-tram-sagas-in-memory</artifactId>
+		</dependency>	
+	    
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>1.14.3</version>
+		</dependency>	
+		
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.14.3</version>
+            <scope>test</scope>
+        </dependency>
+        
+ 	    <dependency>
+	        <groupId>org.junit.jupiter</groupId>
+	        <artifactId>junit-jupiter-api</artifactId>
+	    </dependency>        
+        
+	    <dependency>
+	        <groupId>org.junit.jupiter</groupId>
+	        <artifactId>junit-jupiter-engine</artifactId>
+	    </dependency>  		
+		
+		 <dependency>
+		    <groupId>org.apache.maven.shared</groupId>
+		    <artifactId>maven-invoker</artifactId>
+		    <version>3.0.1</version>
+		    <scope>test</scope>		    
+		</dependency>	
+		
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>						
+		
+	</dependencies>
+	
+	<build>
+		<plugins>
+	    	
+		
+		</plugins>
+	</build>
+</project>

@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>customer-api</artifactId>
+
+    <parent>
+        <groupId>skyglass.composer</groupId>
+        <artifactId>eventuate-saga</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+	<dependencies>	
+	
+        <dependency>
+            <groupId>skyglass.composer</groupId>
+            <artifactId>commons-eventuate</artifactId>
+            <version>${project.version}</version>            
+        </dependency>		
+		
+		<!-- Eventuate Tram -->			
+
+        <dependency>
+            <groupId>io.eventuate.tram.core</groupId>
+            <artifactId>eventuate-tram-commands</artifactId>
+        </dependency>
+		
+	</dependencies>
+	
+	<build>
+		<plugins>
+	    	
+		
+		</plugins>
+	</build>
+</project>

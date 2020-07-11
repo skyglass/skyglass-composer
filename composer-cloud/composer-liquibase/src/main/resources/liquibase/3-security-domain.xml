@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<changeSet author="skyglass" id="skyglass-custom1">
+	
+        <createView viewName="ORGUNIT_OWNERVIEW">SELECT DISTINCT
+            hou.CHILD_UUID AS UUID,        	
+            ou.BUSINESSPARTNER_UUID AS OWNER_UUID
+            FROM ORGUNIT_HIERARCHYVIEW hou 
+            JOIN ORGANIZATIONALUNIT ou ON hou.parent_uuid = ou.uuid AND ou.parent_uuid IS NULL
+        </createView>		
+	
+		<createView viewName="RESOURCEOWNERVIEW">SELECT
+	             bo.UUID AS UUID,
+	             bo.NAME as NAME 
+	             FROM BUSINESSOWNER bo             
+	    </createView>	
+	    
+		<createView viewName="RESOURCECONTEXTVIEW">SELECT
+	             bu.UUID as UUID,
+	             bu.NAME as NAME,
+	             bu.PARENT_UUID as PARENT_UUID,
+	             bu.OWNER_UUID as CONTEXTOWNER_UUID,
+	             bu.OWNER_UUID as RESOURCEOWNER_UUID,
+	             'Owner' as RELATION              
+	             FROM BUSINESSUNIT bu
+	             
+	             UNION SELECT
+	             
+	             bc.UUID as UUID,
+	             bc.NAME as NAME,
+	             bc.PARENT_UUID as PARENT_UUID,
+	             bc.CONTEXTOWNER_UUID as CONTEXTOWNER_UUID,
+	             bc.RESOURCEOWNER_UUID as RESOURCEOWNER_UUID,
+	             bc.RELATION as RELATION
+	             FROM BUSINESSCONTEXT bc
+	    </createView>	 
+		
+		<createView viewName="RESOURCE_OWNERVIEW">SELECT DISTINCT		         
+	             1 AS UUID,
+	             sup.uuid as RESOURCE_UUID,
+	             sup.businessPartner_uuid as OWNER_UUID,
+	             'BusinessOwner' as RESOURCETYPE
+	             FROM Supplier sup  	
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             cust.uuid as RESOURCE_UUID,
+	             cust.businessPartner_uuid as OWNER_UUID,
+	             'BusinessOwner' as RESOURCETYPE	             
+	             FROM BusinessCustomer cust  
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             ouhv.child_uuid as RESOURCE_UUID,
+	             ou.businessPartner_uuid as OWNER_UUID,
+	             'BusinessUnit' as RESOURCETYPE	             
+	             FROM ORGUNIT_HIERARCHYVIEW ouhv
+	             JOIN OrganizationalUnit ou ON ou.parent_uuid IS NULL AND ou.uuid = ouhv.parent_uuid
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             u.uuid as RESOURCE_UUID,
+	             u.owner_uuid as OWNER_UUID,
+	             'User' as RESOURCETYPE	                         
+	             FROM "USER" u
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             bo.uuid as RESOURCE_UUID,
+	             bo.uuid as OWNER_UUID,
+	             'BusinessOwner' as RESOURCETYPE	                         
+	             FROM BusinessOwner bo
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             buhv.child_uuid as RESOURCE_UUID,
+	             bu.owner_uuid as OWNER_UUID,
+	             'BusinessUnit' as RESOURCETYPE	             
+	             FROM BUSINESSUNIT_HIERARCHYVIEW buhv
+	             JOIN BusinessUnit bu ON bu.parent_uuid IS NULL AND bu.uuid = buhv.parent_uuid
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             bchv.child_uuid as RESOURCE_UUID,
+	             bc.contextowner_uuid as OWNER_UUID,
+	             'BusinessContext' as RESOURCETYPE	             
+	             FROM BUSINESSCONTEXT_HIERARCHYVIEW bchv
+	             JOIN BusinessContext bc ON bc.parent_uuid IS NULL AND bc.uuid = bchv.parent_uuid
+	    </createView>				
+		
+			    
+		<createView viewName="CONTEXT_OWNERVIEW">SELECT DISTINCT		         
+	             1 AS UUID,
+	             ouhv.child_uuid as CONTEXT_UUID,
+	             ou.businessPartner_uuid as OWNER_UUID             
+	             FROM ORGUNIT_HIERARCHYVIEW ouhv
+	             JOIN OrganizationalUnit ou ON ou.parent_uuid IS NULL AND ou.uuid = ouhv.parent_uuid
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             buhv.child_uuid as CONTEXT_UUID,
+	             bu.owner_uuid as OWNER_UUID
+	             FROM BUSINESSUNIT_HIERARCHYVIEW buhv
+	             JOIN BusinessUnit bu ON bu.parent_uuid IS NULL AND bu.uuid = buhv.parent_uuid
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             bchv.child_uuid as CONTEXT_UUID,
+	             bc.contextowner_uuid as OWNER_UUID
+	             FROM BUSINESSCONTEXT_HIERARCHYVIEW bchv
+	             JOIN BusinessContext bc ON bc.parent_uuid IS NULL AND bc.uuid = bchv.parent_uuid	             
+	    </createView>	
+	    
+		<createView viewName="RESOURCE_CONTEXTVIEW">SELECT DISTINCT		         
+	             1 AS UUID,
+	             ou.uuid as RESOURCE_UUID,
+	             ou.uuid as CONTEXT_UUID,
+	             co.owner_uuid as OWNER_UUID
+	             FROM OrganizationalUnit ou
+	             JOIN CONTEXT_OWNERVIEW co
+	             ON co.CONTEXT_UUID = ou.uuid
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             bu.uuid as RESOURCE_UUID,
+	             bu.uuid as CONTEXT_UUID,
+	             co.owner_uuid as OWNER_UUID           
+	             FROM BusinessUnit bu
+	             JOIN CONTEXT_OWNERVIEW co
+	             ON co.CONTEXT_UUID = bu.uuid	             
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             bc.uuid as RESOURCE_UUID,
+	             bc.uuid as CONTEXT_UUID,
+	             co.owner_uuid as OWNER_UUID           
+	             FROM BusinessContext bc
+	             JOIN CONTEXT_OWNERVIEW co
+	             ON co.CONTEXT_UUID = bc.uuid		             	
+ 	    </createView>	    
+	    
+		<createView viewName="CONTEXT_RELATIONVIEW">SELECT DISTINCT
+	             1 AS UUID,
+	             ou.businessPartner_uuid as RESOURCEOWNER_UUID,
+	             ou.businessPartner_uuid as CONTEXTOWNER_UUID,
+           		 'Owner' as RELATION
+	             FROM OrganizationalUnit ou
+	             WHERE ou.parent_uuid IS NULL
+		
+			     UNION SELECT
+			     
+	             1 AS UUID,
+	             bu.owner_uuid as RESOURCEOWNER_UUID,
+	             bu.owner_uuid as CONTEXTOWNER_UUID,
+           		 'Owner' as RELATION
+	             FROM BusinessUnit bu
+	             WHERE bu.parent_uuid IS NULL
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             bc.resourceowner_uuid as RESOURCEOWNER_UUID,
+	             bc.contextowner_uuid as CONTEXTOWNER_UUID,
+           		 bc.relation as RELATION
+	             FROM BusinessContext bc
+	             WHERE bc.parent_uuid IS NULL
+	    </createView>
+	    
+		<createView viewName="RESOURCE_RELATIONVIEW">SELECT DISTINCT
+	             1 AS UUID,
+	             rov.RESOURCE_UUID as RESOURCE_UUID,
+	             rcv.CONTEXT_UUID as CONTEXT_UUID,
+	             crv.CONTEXTOWNER_UUID as OWNER_UUID,
+	             crv.RELATION as RELATION
+                 FROM RESOURCE_OWNERVIEW rov
+	             JOIN RESOURCE_CONTEXTVIEW rcv ON rov.resource_uuid = rcv.resource_uuid
+	             JOIN CONTEXT_OWNERVIEW cov ON rcv.context_uuid = cov.context_uuid
+	             JOIN CONTEXT_RELATIONVIEW crv ON crv.resourceowner_uuid = rov.owner_uuid
+	             AND crv.contextowner_uuid = cov.owner_uuid
+	             
+	             UNION SELECT
+		         
+	             1 AS UUID,
+	             rov.RESOURCE_UUID as RESOURCE_UUID,
+	             NULL as CONTEXT_UUID,
+	             br.OWNER_UUID as OWNER_UUID,
+	             br.RELATION as RELATION
+                 FROM RESOURCE_OWNERVIEW rov
+                 JOIN BusinessRelation br on rov.owner_uuid = br.resourceowner_uuid
+	    </createView>
+	    
+	    
+		<createView viewName="_2USERRESOURCECONTEXTPERMISSIONVIEW">SELECT DISTINCT
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             ucpv.RESOURCE_UUID AS RESOURCE_UUID,
+	             ucpv.CONTEXT_UUID AS CONTEXT_UUID,
+	             ucpv.CONTEXTTYPE AS CONTEXTTYPE,
+	             ucpv.OWNER_UUID AS OWNER_UUID,
+	             ucpv.RELATION AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID
+				 FROM USERRESOURCEPERMISSIONVIEW ucpv
+				 
+				 UNION SELECT
+				 
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             rcv.RESOURCE_UUID AS RESOURCE_UUID,
+	             ucpv.CONTEXT_UUID AS CONTEXT_UUID,
+	             ucpv.CONTEXTTYPE AS CONTEXTTYPE,
+	             NULL AS OWNER_UUID,
+	             NULL AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID
+				 FROM RESOURCE_CONTEXTVIEW rcv
+				 JOIN USERCONTEXTPERMISSIONBASICVIEW ucpv
+				 ON ucpv.CONTEXT_UUID = rcv.CONTEXT_UUID
+				 LEFT JOIN USERRESOURCEPERMISSIONVIEW ucpv2
+				 ON ucpv.USER_UUID = ucpv2.USER_UUID AND ucpv.RESOURCETYPE = ucpv2.RESOURCETYPE
+				 AND ucpv2.RESOURCE_UUID = rcv.RESOURCE_UUID
+				 WHERE ucpv2.USER_UUID IS NULL 
+				 AND ucpv.OWNER_UUID IS NULL AND ucpv.RELATION IS NULL
+				 
+				 UNION SELECT
+				 
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             rcv.RESOURCE_UUID AS RESOURCE_UUID,
+	             ucpv.CONTEXT_UUID AS CONTEXT_UUID,
+	             ucpv.CONTEXTTYPE AS CONTEXTTYPE,
+	             ucpv.OWNER_UUID AS OWNER_UUID,
+	             NULL AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID
+				 FROM RESOURCE_CONTEXTVIEW rcv
+				 JOIN USERCONTEXTPERMISSIONBASICVIEW ucpv
+				 ON ucpv.CONTEXT_UUID = rcv.CONTEXT_UUID
+				 JOIN RESOURCE_OWNERVIEW rov ON rov.resource_uuid = rcv.resource_uuid
+				 AND ucpv.OWNER_UUID = rov.OWNER_UUID				 
+				 LEFT JOIN USERRESOURCEPERMISSIONVIEW ucpv2
+				 ON ucpv.USER_UUID = ucpv2.USER_UUID AND ucpv.RESOURCETYPE = ucpv2.RESOURCETYPE
+				 AND ucpv2.RESOURCE_UUID = rcv.RESOURCE_UUID
+				 WHERE ucpv2.USER_UUID IS NULL
+				 AND ucpv.OWNER_UUID IS NOT NULL AND ucpv.RELATION IS NULL
+				 
+				 UNION SELECT
+				 
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             rcv.RESOURCE_UUID AS RESOURCE_UUID,
+	             ucpv.CONTEXT_UUID AS CONTEXT_UUID,
+	             ucpv.CONTEXTTYPE AS CONTEXTTYPE,
+	             NULL AS OWNER_UUID,
+	             ucpv.RELATION AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID
+				 FROM RESOURCE_CONTEXTVIEW rcv
+				 JOIN USERCONTEXTPERMISSIONBASICVIEW ucpv
+				 ON ucpv.CONTEXT_UUID = rcv.CONTEXT_UUID
+				 JOIN RESOURCE_RELATIONVIEW rcrv
+				 ON rcrv.resource_uuid = rcv.resource_uuid
+				 AND ((rcrv.context_uuid IS NULL AND rcrv.owner_uuid = rcv.owner_uuid) 
+				 OR (rcrv.context_uuid IS NOT NULL AND rcrv.context_uuid = rcv.context_uuid))
+				 AND ucpv.RELATION = rcrv.RELATION				 
+				 LEFT JOIN USERRESOURCEPERMISSIONVIEW ucpv2
+				 ON ucpv.USER_UUID = ucpv2.USER_UUID AND ucpv.RESOURCETYPE = ucpv2.RESOURCETYPE
+				 AND ucpv2.RESOURCE_UUID = rcv.RESOURCE_UUID				 
+				 WHERE ucpv2.USER_UUID IS NULL 
+				 AND ucpv.OWNER_UUID IS NULL AND ucpv.RELATION IS NOT NULL
+				 
+				 UNION SELECT
+				 
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             rcv.RESOURCE_UUID AS RESOURCE_UUID,
+	             ucpv.CONTEXT_UUID AS CONTEXT_UUID,
+	             ucpv.CONTEXTTYPE AS CONTEXTTYPE,
+	             ucpv.OWNER_UUID AS OWNER_UUID,
+	             ucpv.RELATION AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID
+				 FROM RESOURCE_CONTEXTVIEW rcv
+				 JOIN USERCONTEXTPERMISSIONBASICVIEW ucpv
+				 ON ucpv.CONTEXT_UUID = rcv.CONTEXT_UUID
+				 JOIN RESOURCE_OWNERVIEW rov ON rov.resource_uuid = rcv.resource_uuid
+				 AND ucpv.OWNER_UUID = rov.OWNER_UUID
+				 JOIN RESOURCE_RELATIONVIEW rcrv
+				 ON rcrv.resource_uuid = rcv.resource_uuid
+				 AND ((rcrv.context_uuid IS NULL AND rcrv.owner_uuid = rcv.owner_uuid) 
+				 OR (rcrv.context_uuid IS NOT NULL AND rcrv.context_uuid = rcv.context_uuid))
+				 AND ucpv.RELATION = rcrv.RELATION
+				 LEFT JOIN USERRESOURCEPERMISSIONVIEW ucpv2
+				 ON ucpv.USER_UUID = ucpv2.USER_UUID AND ucpv.RESOURCETYPE = ucpv2.RESOURCETYPE
+				 AND ucpv2.RESOURCE_UUID = rcv.RESOURCE_UUID				 
+				 WHERE ucpv2.USER_UUID IS NULL
+				 AND ucpv.OWNER_UUID IS NOT NULL AND ucpv.RELATION IS NOT NULL
+	    </createView>	
+	    
+
+		<createView viewName="_USERRESOURCECONTEXTPERMISSIONVIEW">SELECT DISTINCT		         
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             ucpv.RESOURCE_UUID AS RESOURCE_UUID,
+	             ucpv.CONTEXT_UUID AS CONTEXT_UUID,
+	             ucpv.CONTEXTTYPE AS CONTEXTTYPE,
+	             ucpv.OWNER_UUID AS OWNER_UUID,
+	             ucpv.RELATION AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID
+				 FROM _2USERRESOURCECONTEXTPERMISSIONVIEW ucpv
+				 
+				 UNION SELECT
+				 
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             rov.RESOURCE_UUID AS RESOURCE_UUID,
+	             NULL AS CONTEXT_UUID,
+	             NULL AS CONTEXTTYPE,
+	             rov.OWNER_UUID AS OWNER_UUID,
+	             NULL AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID
+				 FROM RESOURCE_OWNERVIEW rov
+				 JOIN USERGLOBALPERMISSIONVIEW ucpv
+				 ON ucpv.OWNER_UUID = rov.OWNER_UUID
+				 LEFT JOIN _2USERRESOURCECONTEXTPERMISSIONVIEW ucpv2
+				 ON ucpv.USER_UUID = ucpv2.USER_UUID AND ucpv.RESOURCETYPE = ucpv2.RESOURCETYPE
+				 AND ucpv2.RESOURCE_UUID = rov.RESOURCE_UUID
+				 WHERE ucpv2.USER_UUID IS NULL
+				 AND ucpv.OWNER_UUID IS NOT NULL AND ucpv.RELATION IS NULL		
+				 
+				 UNION SELECT
+				 
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             rov.RESOURCE_UUID AS RESOURCE_UUID,
+	             NULL AS CONTEXT_UUID,
+	             NULL AS CONTEXTTYPE,
+	             rov.OWNER_UUID AS OWNER_UUID,
+	             ucpv.RELATION AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID
+				 FROM RESOURCE_OWNERVIEW rov
+				 JOIN USERGLOBALPERMISSIONVIEW ucpv
+				 ON ucpv.OWNER_UUID = rov.OWNER_UUID
+				 JOIN RESOURCE_RELATIONVIEW rcrv
+				 ON rcrv.resource_uuid = rov.resource_uuid
+				 AND rcrv.context_uuid IS NULL
+				 AND rcrv.owner_uuid = rov.owner_uuid
+				 AND ucpv.RELATION = rcrv.RELATION
+				 LEFT JOIN _2USERRESOURCECONTEXTPERMISSIONVIEW ucpv2
+				 ON ucpv.USER_UUID = ucpv2.USER_UUID AND ucpv.RESOURCETYPE = ucpv2.RESOURCETYPE
+				 AND ucpv2.RESOURCE_UUID = rov.RESOURCE_UUID
+				 WHERE ucpv2.USER_UUID IS NULL 
+				 AND ucpv.OWNER_UUID IS NOT NULL AND ucpv.RELATION IS NOT NULL	
+	    </createView>	
+	    
+
+		<createView viewName="USERRESOURCECONTEXTPERMISSIONVIEW">SELECT DISTINCT		         
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             ucpv.RESOURCE_UUID AS RESOURCE_UUID,
+	             ucpv.CONTEXT_UUID AS CONTEXT_UUID,
+	             ucpv.CONTEXTTYPE AS CONTEXTTYPE,
+	             ucpv.OWNER_UUID AS OWNER_UUID,
+	             ucpv.RELATION AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID,
+	             op.NAME as OPERATION_NAME
+				 FROM _USERRESOURCECONTEXTPERMISSIONVIEW ucpv
+				 JOIN Operation op ON op.uuid = ucpv.operation_uuid				 
+				 
+				 UNION SELECT
+				 
+	             1 AS UUID,
+	             ucpv.USER_UUID AS USER_UUID,
+	             ucpv.RESOURCETYPE AS RESOURCETYPE,
+	             rov.RESOURCE_UUID AS RESOURCE_UUID,
+	             NULL AS CONTEXT_UUID,
+	             NULL AS CONTEXTTYPE,
+	             NULL AS OWNER_UUID,
+	             NULL AS RELATION,
+	             ucpv.OPERATION_UUID AS OPERATION_UUID,
+	             op.NAME as OPERATION_NAME
+				 FROM RESOURCE_OWNERVIEW rov
+				 JOIN USERGLOBALPERMISSIONVIEW ucpv
+				 ON ucpv.RESOURCETYPE = rov.RESOURCETYPE
+				 AND ucpv.OWNER_UUID IS NULL AND ucpv.RESOURCE_UUID IS NULL AND ucpv.RELATION IS NULL
+				 JOIN Operation op ON op.uuid = ucpv.operation_uuid			 
+				 LEFT JOIN _USERRESOURCECONTEXTPERMISSIONVIEW ucpv2
+				 ON ucpv.USER_UUID = ucpv2.USER_UUID AND ucpv.RESOURCETYPE = ucpv2.RESOURCETYPE
+				 AND ucpv2.RESOURCE_UUID = rov.RESOURCE_UUID
+				 WHERE ucpv2.USER_UUID IS NULL
+	    </createView>	        	    		    
+   	    	           
+        	
+	</changeSet>	
+</databaseChangeLog>

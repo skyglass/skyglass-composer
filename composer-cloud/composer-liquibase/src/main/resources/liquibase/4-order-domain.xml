@@ -1,0 +1,92 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="skyglass" id="create-order-domain">
+    
+        <createTable tableName="product">
+            <column name="uuid" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="productPK"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="DOUBLE(19)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>    
+
+        <createTable tableName="product_attributes">
+            <column name="product_uuid" type="VARCHAR(255)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="attributes" type="VARCHAR(255)"/>
+            <column name="attributes_key" type="VARCHAR(255)">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint baseColumnNames="product_uuid" baseTableName="product_attributes" constraintName="FKk3dnoqjs73kab6v8yok16khal" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="product" validate="true"/>
+
+
+        <createTable tableName="customer">
+            <column name="uuid" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="customerPK"/>
+            </column>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="firstname" type="VARCHAR(255)"/>
+            <column name="lastname" type="VARCHAR(255)"/>
+        </createTable>
+        
+        <addUniqueConstraint columnNames="email" constraintName="UKdwk6cx0afu8bs9o4t536v1j5v" tableName="customer"/>
+        
+        <createTable tableName="address">
+            <column name="uuid" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="addressPK"/>
+            </column>
+            <column name="city" type="VARCHAR(255)"/>
+            <column name="country" type="VARCHAR(255)"/>
+            <column name="street" type="VARCHAR(255)"/>
+            <column name="customer_uuid" type="VARCHAR(255)"/>
+        </createTable>
+        
+ 	    <addForeignKeyConstraint baseColumnNames="customer_uuid" baseTableName="address" constraintName="FKhh3qqn4kfnm9pg5p9xisrvmu7" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="customer" validate="true"/>        
+                
+ 
+        <createTable tableName="orders">
+            <column name="uuid" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="ordersPK"/>
+            </column>
+            <column name="billing_address_uuid" type="VARCHAR(255)"/>
+            <column name="customer_uuid" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="shipping_address_uuid" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint baseColumnNames="customer_uuid" baseTableName="orders" constraintName="FK23nb6ehx25k7karlbgpq442wi" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="customer" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="billing_address_uuid" baseTableName="orders" constraintName="FK4n6ubnjjs76wk6klikc8hbvww" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="address" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="shipping_address_uuid" baseTableName="orders" constraintName="FK8txi6t4mvc1oj5mwamgvipo1u" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="address" validate="true"/>        
+    
+
+        <createTable tableName="line_item">
+            <column name="uuid" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="line_itemPK"/>
+            </column>
+            <column name="amount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="DOUBLE(19)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_uuid" type="VARCHAR(255)"/>
+            <column name="order_uuid" type="VARCHAR(255)"/>
+        </createTable>
+        
+        <addForeignKeyConstraint baseColumnNames="product_uuid" baseTableName="line_item" constraintName="FKpdud3tre5460igqua3tecec3s" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="product" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="order_uuid" baseTableName="line_item" constraintName="FKtldj6gg5wvru12xscs8qmfg3p" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="orders" validate="true"/>        
+
+	</changeSet>
+	
+</databaseChangeLog>

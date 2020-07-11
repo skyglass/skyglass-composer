@@ -1,0 +1,220 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "1.1.1",
+    "title" : "My API"
+  },
+  "host" : "127.0.0.1:8080",
+  "basePath" : "/",
+  "tags" : [ {
+    "name" : "drivers",
+    "description" : "the drivers API"
+  } ],
+  "schemes" : [ "http" ],
+  "paths" : {
+    "/drivers/" : {
+      "get" : {
+        "tags" : [ "drivers" ],
+        "summary" : "Retrieve all drivers",
+        "description" : "",
+        "operationId" : "getAllDrivers",
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully retrieved Drivers",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Driver"
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "drivers" ],
+        "summary" : "Add a new driver",
+        "description" : "",
+        "operationId" : "createDriver",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Driver object that needs to be added",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Driver"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Driver"
+            }
+          },
+          "201" : {
+            "description" : "Created Driver ",
+            "schema" : {
+              "$ref" : "#/definitions/Driver"
+            }
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "drivers" ],
+        "summary" : "Update driver",
+        "description" : "",
+        "operationId" : "updateDriver",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Driver object that needs to be updated",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/DriverInput"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Updated Driver ",
+            "schema" : {
+              "$ref" : "#/definitions/Driver"
+            }
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/drivers/{id}" : {
+      "get" : {
+        "tags" : [ "drivers" ],
+        "summary" : "Retrieve existing driver information",
+        "description" : "",
+        "operationId" : "getDriver",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Id of driver that needs to be retrieved",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully retrieved Driver",
+            "schema" : {
+              "$ref" : "#/definitions/Driver"
+            }
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Driver with specified ID not found"
+          }
+        }
+      }
+    },
+    "/drivers/{locationX}/{locationY}" : {
+      "get" : {
+        "tags" : [ "drivers" ],
+        "summary" : "Find nearest driver",
+        "description" : "",
+        "operationId" : "findNearestDriver",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "locationX",
+          "in" : "path",
+          "description" : "LocationX of driver that needs to be found",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int32"
+        }, {
+          "name" : "locationY",
+          "in" : "path",
+          "description" : "LocationY of driver that needs to be found",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int32"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully retrieved Driver",
+            "schema" : {
+              "$ref" : "#/definitions/Driver"
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters supplied"
+          },
+          "404" : {
+            "description" : "Driver with specified parameters not found"
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "Driver" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "balance" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "carModel" : {
+          "type" : "string"
+        },
+        "carRegistrationNo" : {
+          "type" : "string"
+        },
+        "currentLocationX" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "currentLocationY" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "AVAILABLE", "UNAVAILABLE" ]
+        }
+      }
+    },
+    "DriverInput" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "amount" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "AVAILABLE", "UNAVAILABLE" ]
+        }
+      }
+    }
+  }
+}

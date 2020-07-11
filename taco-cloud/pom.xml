@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+  	<artifactId>taco-cloud</artifactId>
+    <packaging>pom</packaging>
+
+    <parent>
+  		<groupId>skyglass.composer</groupId>
+  		<artifactId>composer-parent</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</parent>
+
+    <properties>
+ 
+    </properties>
+
+    <modules>
+	  <module>tacocloud-api</module>
+      <module>tacocloud-data</module>
+      <module>tacocloud-domain</module>
+      <module>tacocloud-email</module>
+      <module>tacocloud-kitchen</module>
+      <module>tacocloud-messaging-kafka</module>
+      <module>tacocloud-restclient</module>
+      <module>tacocloud-security</module>
+      <module>tacocloud-web</module>
+      <module>tacocloud-ui</module>
+      <module>tacos</module>	  
+      <module>simple-flow</module>
+	</modules>
+
+</project>

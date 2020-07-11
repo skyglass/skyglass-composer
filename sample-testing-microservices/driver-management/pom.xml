@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>skyglass.composer</groupId>
+        <artifactId>sample-testing-microservices</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>         
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>driver-management</artifactId>
+
+    <properties>
+	    <yaml.file>${project.basedir}/src/main/resources/swagger.json</yaml.file>
+	    <generated-sources-path>${project.build.directory}/generated-sources</generated-sources-path>
+	    <generated-sources-java-path>main/java</generated-sources-java-path>
+	    <version.swagger.codegen>3.0.20</version.swagger.codegen>	
+        <client.base.package.name>pl.piomin.services.driver.client</client.base.package.name>	        
+    </properties>
+
+    <dependencies>
+    
+		<dependency>
+		    <groupId>io.swagger.core.v3</groupId>
+		    <artifactId>swagger-annotations</artifactId>
+		    <version>2.1.2</version>
+		</dependency>    
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+  	 
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>        
+        
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>	
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>	
+		
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.9.2</version>
+        </dependency>			        
+        
+		 <dependency>
+		    <groupId>org.apache.maven.shared</groupId>
+		    <artifactId>maven-invoker</artifactId>
+		    <version>3.0.1</version>
+		    <scope>test</scope>		    
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.testcontainers</groupId>
+		    <artifactId>postgresql</artifactId>
+		    <version>1.14.3</version>
+		    <scope>test</scope>
+		</dependency>
+		
+		
+		
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.14.3</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.14.3</version>
+            <scope>test</scope>
+        </dependency>
+        
+	    <dependency>
+	        <groupId>org.junit.jupiter</groupId>
+	        <artifactId>junit-jupiter-engine</artifactId>
+	    </dependency>        
+                
+        <dependency>
+            <groupId>io.specto</groupId>
+            <artifactId>hoverfly-java</artifactId>
+            <version>0.11.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+
+        
+        
+			<plugin>
+			    <groupId>org.springframework.boot</groupId>
+			    <artifactId>spring-boot-maven-plugin</artifactId>
+               <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
+			</plugin>
+            <!--<plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>piomin/driver-management</name>
+                            <alias>dockerfile</alias>
+                            <build>
+                                <dockerFileDir>${project.basedir}</dockerFileDir>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin> -->
+            <!-- <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>pl.piomin.services.driver.contract.DriverControllerIntegrationTests</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>pl.piomin.services.driver.contract.DriverControllerIntegrationTests</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin> -->
+            
+            
+ 			<plugin>
+			    <groupId>com.github.kongchen</groupId>
+			    <artifactId>swagger-maven-plugin</artifactId>
+			    <version>3.1.7</version>
+			    <configuration>
+			        <apiSources>
+			            <apiSource>
+			                <springmvc>true</springmvc>
+			                <locations>
+			                    <location>pl.piomin.services.driver.controller</location>
+			                </locations>
+			                <schemes>
+			                    <scheme>http</scheme>
+			                </schemes>
+			                <host>127.0.0.1:8080</host>
+			                <basePath>/</basePath>
+			                <info>
+			                    <title>My API</title>
+			                    <version>1.1.1</version>
+			                </info>
+			                <swaggerDirectory>${basedir}/src/main/resources/</swaggerDirectory>
+			            </apiSource>
+			        </apiSources>
+			    </configuration>
+                <executions>
+                    <execution>
+				        <id>generate-swagger-yaml</id>
+				        <phase>generate-sources</phase>	
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+			</plugin>
+			
+			<plugin>
+			    <groupId>io.swagger.codegen.v3</groupId>
+			    <artifactId>swagger-codegen-maven-plugin</artifactId>
+			    <version>${version.swagger.codegen}</version>
+			    <executions>
+			        <execution>
+				        <id>generate-swagger</id>
+			            <goals>
+			                <goal>generate</goal>
+			            </goals>
+			            <configuration>
+			                <inputSpec>${yaml.file}</inputSpec>
+			                <language>java</language>
+			                <library>resttemplate</library>
+			                <output>${project.basedir}/target/generated-sources/</output>
+			
+			                <apiPackage>${client.base.package.name}.api</apiPackage>
+			                <modelPackage>${client.base.package.name}.model</modelPackage>
+			                <invokerPackage>${client.base.package.name}.invoker</invokerPackage>
+                            <typeMappings>
+                                <typeMapping>OffsetDateTime=java.time.LocalDateTime</typeMapping>
+                            </typeMappings>
+                            <importMappings>
+                                <importMapping>LocalDateTime=OffsetDateTime</importMapping>
+                            </importMappings>			                
+			
+			                <generateApiTests>false</generateApiTests>
+			                <generateModelTests>false</generateModelTests>
+			                <generateApiDocumentation>false</generateApiDocumentation>
+			                <generateModelDocumentation>false</generateModelDocumentation>
+			                <configOptions>
+			                    <dateLibrary>java8</dateLibrary>
+		                		<sourceFolder>${generated-sources-java-path}</sourceFolder>
+			                </configOptions>
+		            		<output>${generated-sources-path}</output>			                
+			            </configuration>
+			        </execution>
+			    </executions>
+			</plugin>	
+             
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+		                <id>add-generated-source</id>
+		                <phase>initialize</phase>
+		                <goals>
+		                    <goal>add-source</goal>
+		                </goals>
+                        <configuration>
+                            <sources>
+                                <source>${generated-sources-path}/${generated-sources-java-path}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>            
+            
+            
+            
+        </plugins>
+        
+        
+		<pluginManagement>
+		    <plugins>
+
+		    </plugins>
+		</pluginManagement>         
+        
+        
+    </build>
+
+</project>

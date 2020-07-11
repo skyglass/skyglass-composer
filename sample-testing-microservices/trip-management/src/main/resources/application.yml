@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: trip-management
+
+server:
+  port: ${PORT:8080}
+
+app:
+  updateDriverStatus: ${UPDATE_DRIVER_STATUS:true}

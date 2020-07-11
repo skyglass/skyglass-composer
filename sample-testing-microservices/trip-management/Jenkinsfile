@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+    tools {
+        maven 'M3'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/piomin/sample-testing-microservices.git', credentialsId: 'github-piomin', branch: 'master'
+            }
+        }
+        stage('Tests') {
+            steps {
+                dir('trip-management') {
+                    sh 'mvn clean test'
+                }
+            }
+        }
+        stage('Integration Tests') {
+            steps {
+                dir('trip-management') {
+                    script {
+                        waitUntil {
+                            try {
+                                sh 'mvn clean verify -P integration-tests,!unit-tests'
+                                return true
+                            } catch (Exception e) {
+                                def inputRetry = input message:'Retry?', parameters: [booleanParam(defaultValue: true, description: '', name: 'retry')]
+                                return !inputRetry
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                dir('trip-management') {
+                    sh 'mvn package -Dmaven.test.skip=true'
+                }
+            }
+        }
+    }
+}

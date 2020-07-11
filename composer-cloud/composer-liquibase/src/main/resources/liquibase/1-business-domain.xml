@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<changeSet author="skyglass" id="initialDomainChangeLog1">
+	
+		<createTable tableName="BUSINESSOWNER">
+			<column name="UUID" type="NVARCHAR(255)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="NAME" type="NVARCHAR(255)" >
+				<constraints nullable="false" />
+			</column>				
+		</createTable>	
+		
+		<addUniqueConstraint columnNames="NAME" constraintName="unique_businessowner" disabled="false" tableName="BUSINESSOWNER"/>
+ 	    <addForeignKeyConstraint baseColumnNames="OWNER_UUID" baseTableName="USER" constraintName="user_owner_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSOWNER" />  				
+	
+		<createTable tableName="BUSINESSUNIT">
+				<column name="UUID" type="NVARCHAR(255)">
+					<constraints nullable="false" primaryKey="true" />
+				</column>
+				<column name="NAME" type="NVARCHAR(255)" >
+					<constraints nullable="false" />
+				</column>				
+				<column name="OWNER_UUID" type="NVARCHAR(255)" >
+					<constraints nullable="false" />
+				</column>					
+				<column name="PARENT_UUID" type="NVARCHAR(255)" >
+					<constraints nullable="true" />
+				</column>					
+		</createTable>
+		
+		<addUniqueConstraint columnNames="NAME, PARENT_UUID" constraintName="composite_unique_businessunit" disabled="false" tableName="BUSINESSUNIT"/>
+	    <createIndex  tableName="BUSINESSUNIT" indexName="businessUnit_name_idx" unique="false">  
+	        <column  name="NAME" />
+	    </createIndex>
+ 	    <addForeignKeyConstraint baseColumnNames="OWNER_UUID" baseTableName="BUSINESSUNIT" constraintName="businessUnit_owner_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSOWNER" />  
+ 	    <addForeignKeyConstraint baseColumnNames="PARENT_UUID" baseTableName="BUSINESSUNIT" constraintName="businessUnit_parent_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSUNIT" />  	    	    
+	    
+		
+		<createTable tableName="BUSINESSCONTEXT">
+				<column name="UUID" type="NVARCHAR(255)">
+					<constraints nullable="false" primaryKey="true" />
+				</column>
+				<column name="NAME" type="NVARCHAR(255)" >
+					<constraints nullable="false" />
+				</column>					
+				<column name="PARENT_UUID" type="NVARCHAR(255)" >
+					<constraints nullable="true" />
+				</column>									
+				<column name="CONTEXTOWNER_UUID" type="NVARCHAR(255)" >
+					<constraints nullable="false" />
+				</column>					
+				<column name="RESOURCEOWNER_UUID" type="NVARCHAR(255)" >
+					<constraints nullable="false" />
+				</column>					
+				<column name="RELATION" type="NVARCHAR(64)">
+					<constraints nullable="false"/>
+				</column>								
+		</createTable>
+		
+		<addUniqueConstraint columnNames="NAME, PARENT_UUID" constraintName="composite_unique_businesscontext" disabled="false" tableName="BUSINESSCONTEXT"/>
+	    <createIndex  tableName="BUSINESSCONTEXT" indexName="businessContext_name_idx" unique="false">  
+	        <column  name="NAME"/>
+	    </createIndex>		    
+	    <createIndex  tableName="BUSINESSCONTEXT" indexName="businessContext_relation_idx" unique="false">  
+	        <column  name="RELATION"/>
+	    </createIndex>	
+ 	    <addForeignKeyConstraint baseColumnNames="PARENT_UUID" baseTableName="BUSINESSCONTEXT" constraintName="businessContext_parent_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSCONTEXT" />
+ 	    <addForeignKeyConstraint baseColumnNames="CONTEXTOWNER_UUID" baseTableName="BUSINESSCONTEXT" constraintName="businessContext_contextOwner_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSOWNER" />  
+ 	    <addForeignKeyConstraint baseColumnNames="RESOURCEOWNER_UUID" baseTableName="BUSINESSCONTEXT" constraintName="businessContext_resourceOwner_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSOWNER" />   	    	     	    	
+		
+		<createTable tableName="BUSINESSRELATION">
+				<column name="UUID" type="NVARCHAR(255)">
+					<constraints nullable="false" primaryKey="true" />
+				</column>			
+				<column name="OWNER_UUID" type="NVARCHAR(255)" >
+					<constraints nullable="false" />
+				</column>					
+				<column name="RESOURCEOWNER_UUID" type="NVARCHAR(255)" >
+					<constraints nullable="false" />
+				</column>					
+				<column name="RELATION" type="NVARCHAR(64)">
+					<constraints nullable="false"/>
+				</column>								
+		</createTable>
+		
+		<addUniqueConstraint columnNames="OWNER_UUID, RESOURCEOWNER_UUID, RELATION" constraintName="composite_unique_businessrelation" disabled="false" tableName="BUSINESSRELATION"/>
+	    <createIndex  tableName="BUSINESSRELATION" indexName="businessRelation_relation_idx" unique="false">  
+	        <column  name="RELATION"/>
+	    </createIndex>	
+ 	    <addForeignKeyConstraint baseColumnNames="OWNER_UUID" baseTableName="BUSINESSRELATION" constraintName="businessRelation_owner_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSOWNER" />  
+ 	    <addForeignKeyConstraint baseColumnNames="RESOURCEOWNER_UUID" baseTableName="BUSINESSRELATION" constraintName="businessRelation_resourceOwner_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="UUID" referencedTableName="BUSINESSOWNER" />  					
+	
+		
+	</changeSet>
+	
+	
+	<changeSet author="skyglass" id="initDomainSpecial-1" dbms="h2">
+
+		<createTable tableName="BUSINESSUNIT_HIERARCHYVIEW">
+			<column name="UUID" type="NVARCHAR(1)"/>
+			<column name="CHILD_UUID" type="NVARCHAR(255)"/>
+			<column name="PARENT_UUID" type="NVARCHAR(255)"/>
+		</createTable>
+
+ 	    <addForeignKeyConstraint baseColumnNames="child_uuid" baseTableName="businessUnit_hierarchyView" constraintName="businessUnit_hierarchyView_child_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="businessUnit" /> 		
+ 	    <addForeignKeyConstraint baseColumnNames="parent_uuid" baseTableName="businessUnit_hierarchyView" constraintName="businessUnit_hierarchyView_parent_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="businessUnit" /> 		
+		
+		<createTable tableName="BUSINESSCONTEXT_HIERARCHYVIEW">
+			<column name="UUID" type="NVARCHAR(1)"/>
+			<column name="CHILD_UUID" type="NVARCHAR(255)"/>
+			<column name="PARENT_UUID" type="NVARCHAR(255)"/>
+		</createTable>	
+		
+ 	    <addForeignKeyConstraint baseColumnNames="child_uuid" baseTableName="businessContext_hierarchyView" constraintName="businessContext_hierarchyView_child_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="businessContext" /> 		
+ 	    <addForeignKeyConstraint baseColumnNames="parent_uuid" baseTableName="businessContext_hierarchyView" constraintName="businessContext_hierarchyView_parent_uuid_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="uuid" referencedTableName="businessContext" /> 				
+
+	</changeSet>	
+
+
+	<changeSet author="skyglass" id="initDomainSpecial-1" dbms="postgresql">
+
+		<createView viewName="BUSINESSUNIT_HIERARCHYVIEW">
+		            WITH RECURSIVE HIERARCHY(UUID, CHILD_UUID, PARENT_UUID) 
+		            
+		            AS (
+		            
+		            SELECT
+		            1 as UUID, o1.UUID as CHILD_UUID, o2.UUID as PARENT_UUID 
+		            FROM BUSINESSUNIT o1 
+		            JOIN BUSINESSUNIT o2 ON o1.PARENT_UUID = o2.UUID
+		            UNION ALL
+		            SELECT 1 as UUID, o.UUID as CHILD_UUID, h.PARENT_UUID as PARENT_UUID
+		            FROM HIERARCHY h JOIN BUSINESSUNIT o
+		            on h.CHILD_UUID = o.PARENT_UUID
+		            
+		            )
+		            
+		            SELECT  1 as UUID, h.CHILD_UUID, h.PARENT_UUID FROM HIERARCHY h
+		            UNION ALL
+		                SELECT 1 as UUID, o.UUID as CHILD_UUID, o.UUID as PARENT_UUID FROM BUSINESSUNIT o
+		</createView>
+		   
+		<createView viewName="BUSINESSCONTEXT_HIERARCHYVIEW">
+		            WITH RECURSIVE HIERARCHY(UUID, CHILD_UUID, PARENT_UUID) 
+		            
+		            AS (
+		            
+		            SELECT
+		            1 as UUID, o1.UUID as CHILD_UUID, o2.UUID as PARENT_UUID 
+		            FROM BUSINESSCONTEXT o1
+		            JOIN BUSINESSCONTEXT o2 ON o1.PARENT_UUID = o2.UUID
+		            UNION ALL
+		            SELECT 1 as UUID, o.UUID as CHILD_UUID, h.PARENT_UUID as PARENT_UUID
+		            FROM HIERARCHY h JOIN BUSINESSCONTEXT o
+		            on h.CHILD_UUID = o.PARENT_UUID
+		            
+		            )
+		            
+		            SELECT  1 as UUID, h.CHILD_UUID, h.PARENT_UUID FROM HIERARCHY h
+		            UNION ALL
+		                SELECT 1 as UUID, o.UUID as CHILD_UUID, o.UUID as PARENT_UUID FROM BUSINESSCONTEXT o
+		   </createView>		   
+	</changeSet>	
+	
+</databaseChangeLog>

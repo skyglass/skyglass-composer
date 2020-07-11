@@ -1,0 +1,131 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "1.1.1",
+    "title" : "My API"
+  },
+  "host" : "127.0.0.1:8080",
+  "basePath" : "/",
+  "tags" : [ {
+    "name" : "orders",
+    "description" : "the orders API"
+  } ],
+  "schemes" : [ "http" ],
+  "paths" : {
+    "/orders/" : {
+      "post" : {
+        "tags" : [ "orders" ],
+        "summary" : "Create a new order",
+        "description" : "",
+        "operationId" : "createOrder",
+        "consumes" : [ "application/xml", "application/json" ],
+        "produces" : [ "application/xml", "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Order object that needs to be created",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CreateOrderRequest"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/CreateOrderResponse"
+            }
+          },
+          "201" : {
+            "description" : "Created Order",
+            "schema" : {
+              "$ref" : "#/definitions/CreateOrderResponse"
+            }
+          },
+          "405" : {
+            "description" : "Invalid input"
+          }
+        }
+      }
+    },
+    "/orders/{orderId}" : {
+      "get" : {
+        "tags" : [ "orders" ],
+        "summary" : "Retrieve existing Order by Id",
+        "description" : "",
+        "operationId" : "getOrderById",
+        "produces" : [ "application/xml" ],
+        "parameters" : [ {
+          "name" : "orderId",
+          "in" : "path",
+          "description" : "Order id",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully retrieved Order Slot",
+            "schema" : {
+              "$ref" : "#/definitions/GetOrderResponse"
+            }
+          },
+          "400" : {
+            "description" : "Invalid ID supplied"
+          },
+          "404" : {
+            "description" : "Order with specified ID not found"
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "CreateOrderRequest" : {
+      "type" : "object",
+      "properties" : {
+        "orderTotal" : {
+          "$ref" : "#/definitions/Money"
+        },
+        "customerId" : {
+          "type" : "integer",
+          "format" : "int64"
+        }
+      }
+    },
+    "CreateOrderResponse" : {
+      "type" : "object",
+      "properties" : {
+        "orderId" : {
+          "type" : "integer",
+          "format" : "int64"
+        }
+      }
+    },
+    "GetOrderResponse" : {
+      "type" : "object",
+      "properties" : {
+        "orderId" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "orderState" : {
+          "type" : "string",
+          "enum" : [ "PENDING", "APPROVED", "REJECTED" ]
+        },
+        "rejectionReason" : {
+          "type" : "string",
+          "enum" : [ "INSUFFICIENT_CREDIT", "UNKNOWN_CUSTOMER" ]
+        }
+      }
+    },
+    "Money" : {
+      "type" : "object",
+      "properties" : {
+        "amount" : {
+          "type" : "number"
+        }
+      }
+    }
+  }
+}

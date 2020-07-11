@@ -1,0 +1,12 @@
+bin/
+build/
+target/
+/.gradle
+/.settings
+.classpath
+.project
+.mvn
+.springBeans
+mvnw.cmd
+mvnw
+build-and-test-everything.log
