@@ -546,6 +546,7 @@
 
     <modules>  
 	   <module>build-tools</module>	
+       <module>bakery-factory</module>		   
        <module>composer-cloud</module>	
        <module>social-cloud</module>	   
        <module>eventuate-saga</module>	
