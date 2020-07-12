@@ -1,0 +1,10 @@
+bin/
+target/
+/.settings
+.classpath
+.project
+.mvn
+.springBeans
+mvnw.cmd
+mvnw
+src/main/resources/static/

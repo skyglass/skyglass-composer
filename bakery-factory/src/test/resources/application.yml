@@ -1,0 +1,6 @@
+logging:
+  level:
+    com:
+      gargoylesoftware:
+        htmlunit:
+          DefaultCssErrorHandler: ERROR
