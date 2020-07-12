@@ -1,0 +1,47 @@
+language: generic
+
+# Sudo required for doing docker build
+sudo: required
+services:
+- docker
+
+# Build the app and a docker image
+script:
+- travis_fold start docker_build
+- docker run -v ${PWD}:/opt/killrvideo-java -w /opt/killrvideo-java maven mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B
+- docker build -t ${TRAVIS_COMMIT} -t killrvideo-java-local .
+- travis_fold end docker_build
+- travis_fold start docker_dependencies_up
+- docker-compose -f docker-compose.ci.yml up -d dse dse-config
+- sleep 180
+- docker-compose -f docker-compose.ci.yml up -d backend
+- sleep 180
+- docker-compose -f docker-compose.ci.yml exec backend echo 'Still alive!' || { echo "Backend is down"; docker-compose -f docker-compose.ci.yml logs dse-config backend; exit 1; }
+- travis_fold end docker_dependencies_up
+- docker run --network killrvideo-java_default killrvideo/killrvideo-integration-tests
+
+# If successful, see if we need to publish also
+after_success:
+- "[ \"$TRAVIS_EVENT_TYPE\" = \"cron\" ] && { echo \"Ignore nightly builds\"; travis_terminate 0; }"
+- test -z $TRAVIS_TAG && { echo "Ignore non-tagged builds"; travis_terminate 0; }
+- docker tag ${TRAVIS_COMMIT} killrvideo/killrvideo-java:${TRAVIS_TAG}
+- echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+- docker push killrvideo/killrvideo-java:${TRAVIS_TAG}
+- "[ \"$(git tag --sort=-v:refname | grep -P \"^\\d+.\\d+.\\d+$\" | head -n1)\" == \"$TRAVIS_TAG\" ] && { docker tag ${TRAVIS_COMMIT} killrvideo/killrvideo-java:latest; docker push killrvideo/killrvideo-java:latest; }"
+
+after_failure:
+- travis_fold start docker_logs
+- docker-compose -f docker-compose.ci.yml logs dse-config backend
+- travis_fold end docker_logs
+
+env:
+  global:
+  # DOCKER_USER & PASS
+  - secure: hL9GzKnAuHP130bLzB1nK9eF6bfPD4yFdQ1IdRRp7QDZ+AJ2MUw483w5Uacw6/VNk+KlItO9ySxkAI8gaBcxjxcp+TmFkmD0o4rRQixCoZiqlNeTCMmkx5J6KffNALiFBFPjOvVNXLEYh6lbyIsPJR0/eHGlhCbfpx9Ok9PxzVV4AtNNXVcqCl4hZFWPU8OX7nL0pyQ86MD1WiC/1nfTaE/9zaZ8M/qJhv558KmsSXnFN1eGrwVJLt8XPbZ5aKEvJq3cngwVJ3/hmMQnA6ScgANZFbFrDZo9gDmQLDAbGzQ4mg1wpmvdCGB9HEo14o+ZK3utmnURZDGLHcbgKitIp7fd+FyIktxF3h+hYm7yMV/P67ixLXWxay9F0XXkKF1CPhRU+uEijcWQY/txUItvfHJtDGQbHhChUPmzv2eTQD5QoevFByZ6c3ekQew6hgCPaOsV2FspQQ+XVtdjiiOzmWzeFux2Obc46K85BSyeEp9SjuTJ0772dFBZjWn9UP+M5B8THs4BNPhkSVhceHQBvv65H8DZYEazue0aJYwJhMd1qx5tq/3dXItyDVqxCj0J0LFI4TsFbSf4R+snYOxjc2dkpO1l9aZyLNBTbRn//MTki8o/tdIjAzNYKKWHHBWCYN7OU4Ej4t7XI/SKs3Wf131ebqLlTYU0ppJD7KQUvCU=
+  - secure: hxakhOfACkkXcGc5T9cT0+a+ICw6X2ybsOXzJsgdju4QbdP0nD2iBSZCypDzfdzlF/y83yJGcSznegMega37ABomPd8BF04IJTY1ZSvfj8LiUiLLfo/YSsz68r/X1G/AxVmS/7x9x5xaCPMnCHaH2jK5Qiogawzlqgqw/h3EAQlnJyKdjwwmFpATUAuRJidQ/95pn4KYvERg3eZ7/DzqbAO4IRjSuxHRNqDsHXDR4xlBxXAwqt0SE9qfr8rIbuA264vwStltPi4RDfTWWBooxFTGWHpu7rS/N1xEg7+48Il0zckVqmbwMJeAfl8abXhqK5RRrpv77icHeqxi5bev/SL28PnNOhj5gXn6a4/1/JPuhzmKp1omNtlJsjjZhs7YidSOVQ2nEJjDoeQ9/d+Z+g6DosnkDbiS7+ijvIPD9SlRbyUlf7Z3wD8Hf91/fUgkaUoIVkBUFvW8i0fArfcWSIQErvixIGhj41yNOwIAheUFM4Y39NsuilJZZmqZ2Zh0/9AHUiY4fA7C6CajFC06CpjUCpDhb3m0uy1vJcUiG7Y3J6iTrRzaW8eqPnGBQcVTS7/dXPj3WtEP/xOF93sYeZMKE7hk489WAUJNLV9kmasSaVTzbu80kfM5Ml9m675dN3ztUAhaAPT0IqHnycngMBKe2Y7+EDalsDBsffOpO0k=
+
+notifications:
+  slack:
+    rooms:
+      secure: N6FrJ0l0gw2t1wnty/xPDKvLBZlzOAmkIbHjd4ZrtaC4vLU8iZP+YCRvQd7Vwzc97yDhHIZ41eGtjHjBIIeMX/3rfuS+6GA4VJgyNFGsP0f81YYHxiMOEUlVa2O6LBwbF3LokaFi3l7Iau1c5Op9c3LinhTdE0W6KG+2gxEqSKJkBcVJfK9SZGXg3+6qlq065BWx7xWlzoWgMFyipJJLW1BAqEzP5cc6hHozJ5H/8ucMaJbWQF+nOaIYUJdaop4ChSpe6EFyg0XNp+mIjJ2BxZ6hfYrAs69vwBapBepe4zEoR5xdN1dGUAIDqNY9rr4Npp8InFmBmnlL1xG6FeG73C2qfSr3Y2WziOtwececzmuQWI2Do9ioB5k0KtC4UAV42tpADUODrrwxE8S32tqgr0Pojg8FvgsM6O3twvF1UH3LLEyW7zDzuDpYdtvIROWZGerxyWqQIFI7MzragyL+ZiKKUOG1uKsA8DoeECcMHuUsDEsR/mHalmQGGl2ZNGpphAHg/1HtjB32VDCIuZpFHsqFG7BfMY2dg8Mm+ea4j9imOxM+2TFxbPhoIjIJq1o+/YvolrYviWgmQOpeFw0c1xXWSL5aXmBv2nUnlBaXxfzC9FTl0xmovJmKeYhqJ81TMa33gimsMeccZIDmzcMDsW82idsvtHeNDSX1wil5DXA=
+

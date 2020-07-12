@@ -1,0 +1,372 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.datastax</groupId>
+	<artifactId>killrvideo-parent</artifactId>
+	<name>KillrVideo</name>
+	<packaging>pom</packaging>
+	<version>3.1.0</version>
+
+	<inceptionYear>2016</inceptionYear>
+	<url>https://killrvideo.github.io/</url>
+	<description>
+     KillrVideo is a reference application for developers looking to learn how to 
+     build applications with Apache Cassandra and DataStax Enterprise.
+   </description>
+
+   <modules>
+		<module>killrvideo-commons</module>
+		<module>killrvideo-service-comments</module>
+		<module>killrvideo-service-ratings</module>
+		<module>killrvideo-service-search</module>
+		<module>killrvideo-service-statistics</module>
+		<module>killrvideo-service-users</module>
+		<module>killrvideo-service-videocatalog</module>
+		<module>killrvideo-service-sugestedvideo</module>
+		<module>killrvideo-services</module>
+	</modules>
+	
+	<properties>
+
+		<java.version>12</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- DataStax Java-Driver -->
+		<cassandra-java-driver.version>4.5.1</cassandra-java-driver.version>
+		
+		<!-- Spring -->
+		<spring.version>5.1.9.RELEASE</spring.version>
+		<spring-boot.version>2.1.7.RELEASE</spring-boot.version>
+		
+		<!-- Grpc -->
+		<grpc.version>1.23.0</grpc.version>
+		<protobuf.version>3.9.1</protobuf.version>
+		<guava.version>28.0-jre</guava.version>
+		
+		<!-- Test -->
+		<junit-jupiter.version>5.5.1</junit-jupiter.version>
+		<cucumber.version>1.2.5</cucumber.version>
+		<assertj.version>3.13.2</assertj.version>
+		<testcontainers.version>1.12.0</testcontainers.version>
+
+		<!-- Validation -->
+		<javax.el.api.version>3.0.0</javax.el.api.version>
+		<validator.version>6.0.11.Final</validator.version>
+		<validation.api.version>2.0.1.Final</validation.api.version>
+
+		<!-- kafka -->
+		<kafka-connect.version>2.1.0</kafka-connect.version>
+		
+		<!-- Utilities -->
+		<logback.version>1.2.3</logback.version>
+		<mockito.version>1.9.5</mockito.version>
+		<retry4j.version>0.14.0</retry4j.version>
+		<commons.lang3.version>3.7</commons.lang3.version>
+		<commons-codec.version>1.11</commons-codec.version>
+		<commons-collections.version>4.1</commons-collections.version>
+		<netty.version>4.1.23.Final</netty.version>
+		<docker.image.prefix>killrvideo</docker.image.prefix>
+		
+		<!-- Maven -->
+		<maven-os-plugin.version>1.6.2</maven-os-plugin.version>
+		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+		<maven-protobuf-plugin.version>0.6.1</maven-protobuf-plugin.version>
+		<maven-build-helper-plugin.version>3.0.0</maven-build-helper-plugin.version>
+		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+		<maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
+		<maven-docker-plugin.version>1.4.10</maven-docker-plugin.version>
+		
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- Merge Drivers -->
+			<dependency>
+				<groupId>com.datastax.oss</groupId>
+				<artifactId>java-driver-core</artifactId>
+				<version>${cassandra-java-driver.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.datastax.oss</groupId>
+				<artifactId>java-driver-query-builder</artifactId>
+				<version>${cassandra-java-driver.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.datastax.oss</groupId>
+				<artifactId>java-driver-mapper-runtime</artifactId>
+				<version>${cassandra-java-driver.version}</version>
+			</dependency>
+			
+			<!-- Bean Validation -->
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>${validation.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>${validator.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.validator</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>${validator.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.el</artifactId>
+				<version>${javax.el.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.el</groupId>
+				<artifactId>javax.el-api</artifactId>
+				<version>${javax.el.api.version}</version>
+			</dependency>
+
+			<!-- GRPC -->
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-all</artifactId>
+				<version>${grpc.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>${protobuf.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons.lang3.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${commons-codec.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>${commons-collections.version}</version>
+			</dependency>
+
+			<!-- Kafka -->
+			<dependency>
+				<groupId>org.apache.kafka</groupId>
+				<artifactId>connect-api</artifactId>
+				<version>${kafka-connect.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.kafka</groupId>
+				<artifactId>connect-json</artifactId>
+				<version>${kafka-connect.version}</version>
+			</dependency>
+
+
+			<!-- Spring* -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aop</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+
+			<!-- Spring-Boot BOM -->
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- Logging -->
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>${logback.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>${logback.version}</version>
+			</dependency>
+			
+			<dependency>
+			   <groupId>org.junit.jupiter</groupId>
+			   <artifactId>junit-jupiter</artifactId>
+			   <version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+			  <groupId>org.testcontainers</groupId>
+			  <artifactId>testcontainers</artifactId>
+			  <version>${testcontainers.version}</version>
+		    </dependency>
+		    <dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>${assertj.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>info.cukes</groupId>
+				<artifactId>cucumber-java</artifactId>
+				<version>${cucumber.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>info.cukes</groupId>
+				<artifactId>cucumber-spring</artifactId>
+				<version>${cucumber.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>info.cukes</groupId>
+				<artifactId>cucumber-junit</artifactId>
+				<version>${cucumber.version}</version>
+			</dependency>
+			
+			<!-- Extra Libs -->
+			<dependency>
+				<groupId>com.evanlennick</groupId>
+				<artifactId>retry4j</artifactId>
+				<version>${retry4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-all</artifactId>
+				<version>${netty.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- ~ BUILD ~ -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<build>
+
+		<finalName>killrvideo-java</finalName>
+
+		<extensions>
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>${maven-os-plugin.version}</version>
+			</extension>
+		</extensions>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin.version}</version>
+					<configuration>
+						<release>${java.version}</release>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>com.datastax.oss</groupId>
+								<artifactId>java-driver-mapper-processor</artifactId>
+								<version>${cassandra-java-driver.version}</version>
+							</path>
+						</annotationProcessorPaths>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${maven-surefire-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>${maven-failsafe-plugin.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<!-- Add GRPC Sources -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>${maven-build-helper-plugin.version}</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>target/generated-sources/protobuf/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>${maven-protobuf-plugin.version}</version>
+				<configuration>
+					<protoSourceRoot>${basedir}/src/main/resources/proto</protoSourceRoot>
+					<protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+					<pluginId>grpc-java</pluginId>
+					<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>compile-custom</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<licenses>
+		<license>
+			<name>Apache 2</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>DataStax</name>
+		<url>https://datastax.com/</url>
+	</organization>
+
+</project>
