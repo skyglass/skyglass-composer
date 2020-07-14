@@ -8,11 +8,11 @@ import org.assertj.core.util.Lists;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 public class SpringApplicationWrapper {
 
@@ -134,8 +134,11 @@ public class SpringApplicationWrapper {
 		@Override
 		public Boolean call() throws Exception {
 			try {
-				ResponseEntity<JsonNode> response = template
-						.postForEntity(managementUrl + "/shutdown", JsonNodeFactory.instance.objectNode(), JsonNode.class);
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_JSON);
+
+				HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+				ResponseEntity<String> response = template.postForEntity(managementUrl + "/shutdown", entity, String.class);
 				boolean isStopped = response != null && response.getStatusCode().is2xxSuccessful();
 				if (isStopped) {
 					status = Status.STOPPED;
