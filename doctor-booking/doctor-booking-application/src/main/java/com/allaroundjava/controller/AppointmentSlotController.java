@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.allaroundjava.client.api.DoctorsApi;
+import com.allaroundjava.client.invoker.ApiClient;
+import com.allaroundjava.client.model.DoctorDto;
 import com.allaroundjava.dto.AppointmentSlotCollectionDto;
 import com.allaroundjava.dto.AppointmentSlotDto;
 import com.allaroundjava.dto.mapper.AppointmentSlotMapper;
@@ -41,10 +44,15 @@ public class AppointmentSlotController {
 
 	private final DoctorService doctorService;
 
+	private final DoctorsApi doctorsApi;
+
 	@Autowired
 	public AppointmentSlotController(AppointmentSlotService appointmentSlotService, DoctorService doctorService) {
 		this.appointmentSlotService = appointmentSlotService;
 		this.doctorService = doctorService;
+		ApiClient apiClient = new ApiClient();
+		//apiClient.setBasePath(apiClient.getBasePath().replace("8080", Integer.toString(port)));
+		doctorsApi = new DoctorsApi(apiClient);
 	}
 
 	//@Override
@@ -90,8 +98,31 @@ public class AppointmentSlotController {
 			@ApiParam(value = "Id of doctor for whom appointments to retrieve", required = true) @RequestParam(value = "doctorId", required = true) Long doctorId,
 			@ApiParam(value = "Slots after this date will be retrieved", required = true) @RequestParam(value = "startDate", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
 			@ApiParam(value = "Slots up to this date will be retrieved", required = true) @RequestParam(value = "endDate", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-		Doctor doctor = doctorService.getById(doctorId)
-				.orElseThrow(() -> new NotFoundException(String.format("Doctor with ID %d not found", doctorId)));
+
+		Doctor doctor = doctorService.getById(doctorId).orElseThrow(() -> new NotFoundException(String.format("Doctor with ID %d not found", doctorId)));
+
+		List<AppointmentSlot> result = appointmentSlotService.getAppointmentSlotsBetween(doctor, startDate, endDate);
+
+		AppointmentSlotCollectionDto collectionDto = AppointmentSlotMapper.toCollectionDto(result);
+		buildHateoasForSlotCollection(doctorId, startDate, endDate, collectionDto);
+		return ResponseEntity.status(HttpStatus.OK).body(collectionDto);
+	}
+
+	@ApiOperation(value = "Retrieve all appointment slots for given doctor in specified dates", nickname = "getSlots", notes = "", response = AppointmentSlotCollectionDto.class, tags = { "slots", })
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Successfully retrieved appointment slots", response = AppointmentSlotCollectionDto.class),
+			@ApiResponse(code = 400, message = "Invalid data supplied") })
+	@RequestMapping(value = { "/integration-test" }, produces = { "application/xml" }, method = RequestMethod.GET)
+	public ResponseEntity<AppointmentSlotCollectionDto> getSlotsForIntegrationTest(
+			@ApiParam(value = "Id of doctor for whom appointments to retrieve", required = true) @RequestParam(value = "doctorId", required = true) Long doctorId,
+			@ApiParam(value = "Slots after this date will be retrieved", required = true) @RequestParam(value = "startDate", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+			@ApiParam(value = "Slots up to this date will be retrieved", required = true) @RequestParam(value = "endDate", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+		//Doctor doctor = doctorService.getById(doctorId)
+		DoctorDto doctorDto = doctorsApi.getDoctor(doctorId);
+		if (doctorDto == null) {
+			throw new NotFoundException(String.format("Doctor with ID %d not found", doctorId));
+		}
+		Doctor doctor = doctorService.getById(doctorDto.getEntityId()).get();
 
 		List<AppointmentSlot> result = appointmentSlotService.getAppointmentSlotsBetween(doctor, startDate, endDate);
 

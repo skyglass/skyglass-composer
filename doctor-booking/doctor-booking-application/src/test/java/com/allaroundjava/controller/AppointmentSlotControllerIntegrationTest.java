@@ -26,7 +26,7 @@ import com.allaroundjava.model.Doctor;
 import com.allaroundjava.service.AppointmentSlotService;
 import com.allaroundjava.service.DoctorService;
 
-public class AppointmentSlotControllerTest {
+public class AppointmentSlotControllerIntegrationTest {
 	private AppointmentSlotController appointmentSlotController;
 
 	private AppointmentSlotService appointmentSlotService;
@@ -37,7 +37,7 @@ public class AppointmentSlotControllerTest {
 
 	private Doctor doctor;
 
-	public AppointmentSlotControllerTest() {
+	public AppointmentSlotControllerIntegrationTest() {
 		appointmentSlotService = Mockito.mock(AppointmentSlotService.class);
 		doctorService = Mockito.mock(DoctorService.class);
 		appointmentSlotController = new AppointmentSlotController(appointmentSlotService, doctorService);
@@ -120,7 +120,7 @@ public class AppointmentSlotControllerTest {
 
 		Mockito.doReturn(appointmentSlots).when(appointmentSlotService).getAppointmentSlotsBetween(doctor, slotStart, slotEnd);
 
-		String path = String.format("/slots?doctorId=1&startDate=%s&endDate=%s", slotStart.format(DateTimeFormatter.ISO_DATE_TIME), slotEnd.format(DateTimeFormatter.ISO_DATE_TIME));
+		String path = String.format("/slots/integration-test?doctorId=1&startDate=%s&endDate=%s", slotStart.format(DateTimeFormatter.ISO_DATE_TIME), slotEnd.format(DateTimeFormatter.ISO_DATE_TIME));
 		mockMvc.perform(MockMvcRequestBuilders.get(path))
 				.andExpect(MockMvcResultMatchers.status().is(HttpStatus.OK.value()))
 				.andExpect(MockMvcResultMatchers.content().string(containsString("AppointmentSlotCollection")));

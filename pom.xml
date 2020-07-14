@@ -20,12 +20,14 @@
         <spring.version>5.2.7.RELEASE</spring.version>
         <querydsl.version>4.2.1</querydsl.version>  
 		<springfox.version>2.9.2</springfox.version>
-		<cucumber.version>4.7.2</cucumber.version>	
+		<cucumber.version>6.2.2</cucumber.version>	
 		<eclipselink.version>2.7.3</eclipselink.version>	
 		<skyglass.query.version>1.012</skyglass.query.version>		
 		<eventuate.tram.version>0.22.0.RC8</eventuate.tram.version>	
 		<eventuate.tram.sagas.version>0.12.0.RC7</eventuate.tram.sagas.version>			
 		<eventuate.util.version>0.1.0.RELEASE</eventuate.util.version>	
+        <jmockit.version>1.49</jmockit.version>
+        <guava.version>29.0-jre</guava.version>		
     </properties>
 
     <scm>
@@ -101,7 +103,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.12</version>
+                <version>1.7.30</version>
                 <scope>provided</scope>
             </dependency>
             
@@ -261,7 +263,35 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-csv</artifactId>
 				<version>1.5</version>
-			</dependency>				
+			</dependency>	
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-java</artifactId>
+                <version>${cucumber.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-junit</artifactId>
+                <version>${cucumber.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-spring</artifactId>
+                <version>${cucumber.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jmockit</groupId>
+                <artifactId>jmockit</artifactId>
+                <version>${jmockit.version}</version>
+                <scope>test</scope>
+            </dependency>			
 			
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -289,11 +319,6 @@
     <build>
         <pluginManagement>
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>				
-			</plugin>
 			<plugin>
 				<groupId>net.revelc.code.formatter</groupId>
 				<artifactId>formatter-maven-plugin</artifactId>
@@ -465,6 +490,21 @@
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
+				</plugin>	
+
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<configuration>
+						<executable>true</executable>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>repackage</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>				
 		
 		</plugins>
