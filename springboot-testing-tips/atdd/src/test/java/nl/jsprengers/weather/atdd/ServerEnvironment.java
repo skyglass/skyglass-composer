@@ -24,8 +24,6 @@ public class ServerEnvironment {
 						"--management.context-path=/actuator",
 						"--management.endpoint.metrics.enabled=true",
 						"--management.endpoints.web.exposure.include=shutdown,mappings",
-						"--management.endpoint.prometheus.enabled=true",
-						"--management.metrics.export.prometheus.enabled=true",
 						"--management.endpoint.health.show-details=always",
 						"--management.endpoint.beans.enabled=true",
 						"--logging.level.org.springframework=WARN");

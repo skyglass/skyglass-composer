@@ -51,7 +51,7 @@ public class AppointmentSlotController {
 		this.appointmentSlotService = appointmentSlotService;
 		this.doctorService = doctorService;
 		ApiClient apiClient = new ApiClient();
-		//apiClient.setBasePath(apiClient.getBasePath().replace("8080", Integer.toString(port)));
+		apiClient.setBasePath(apiClient.getBasePath().replace("8080", Integer.toString(8090)));
 		doctorsApi = new DoctorsApi(apiClient);
 	}
 

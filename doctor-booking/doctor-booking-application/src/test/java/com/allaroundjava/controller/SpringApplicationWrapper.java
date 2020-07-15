@@ -1,4 +1,4 @@
-package nl.jsprengers.weather.atdd;
+package com.allaroundjava.controller;
 
 import java.io.IOException;
 import java.util.List;

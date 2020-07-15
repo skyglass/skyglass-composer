@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
@@ -124,5 +126,15 @@ public class AppointmentSlotControllerIntegrationTest {
 		mockMvc.perform(MockMvcRequestBuilders.get(path))
 				.andExpect(MockMvcResultMatchers.status().is(HttpStatus.OK.value()))
 				.andExpect(MockMvcResultMatchers.content().string(containsString("AppointmentSlotCollection")));
+	}
+
+	@BeforeClass
+	public static void setup() {
+		ServerEnvironment.start();
+	}
+
+	@AfterClass
+	public static void tearDown() {
+		ServerEnvironment.shutdown();
 	}
 }

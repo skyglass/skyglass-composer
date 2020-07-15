@@ -84,40 +84,7 @@
                 </configuration>
             </plugin>
             
- 			<plugin>
-			    <groupId>com.github.kongchen</groupId>
-			    <artifactId>swagger-maven-plugin</artifactId>
-			    <version>3.1.7</version>
-			    <configuration>
-			        <apiSources>
-			            <apiSource>
-			                <springmvc>true</springmvc>
-			                <locations>
-			                    <location>com.allaroundjava.controller</location>
-			                </locations>
-			                <schemes>
-			                    <scheme>http</scheme>
-			                </schemes>
-			                <host>127.0.0.1:8080</host>
-			                <basePath>/</basePath>
-			                <info>
-			                    <title>My API</title>
-			                    <version>1.1.1</version>
-			                </info>
-			                <swaggerDirectory>${basedir}/src/main/resources/</swaggerDirectory>
-			            </apiSource>
-			        </apiSources>
-			    </configuration>
-                <executions>
-                    <execution>
-				        <id>generate-swagger-yaml</id>
-				        <phase>generate-sources</phase>	
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-			</plugin>
+
 			
 			<plugin>
 			    <groupId>io.swagger.codegen.v3</groupId>
