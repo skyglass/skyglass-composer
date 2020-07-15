@@ -563,6 +563,15 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		
+		<repository>
+			<id>palantir-repository</id>
+			<name>Palantir Repository</name>
+			<url>https://dl.bintray.com/palantir/releases</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>		
 	</repositories>
 
 	<pluginRepositories>

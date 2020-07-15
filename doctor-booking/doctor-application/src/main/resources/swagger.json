@@ -194,19 +194,6 @@
     "Resource" : {
       "type" : "object",
       "properties" : {
-        "url" : {
-          "type" : "string",
-          "format" : "url"
-        },
-        "file" : {
-          "type" : "file"
-        },
-        "open" : {
-          "type" : "boolean"
-        },
-        "readable" : {
-          "type" : "boolean"
-        },
         "uri" : {
           "type" : "string",
           "format" : "uri"
@@ -216,6 +203,19 @@
         },
         "filename" : {
           "type" : "string"
+        },
+        "open" : {
+          "type" : "boolean"
+        },
+        "file" : {
+          "type" : "file"
+        },
+        "url" : {
+          "type" : "string",
+          "format" : "url"
+        },
+        "readable" : {
+          "type" : "boolean"
         },
         "inputStream" : {
           "$ref" : "#/definitions/InputStream"

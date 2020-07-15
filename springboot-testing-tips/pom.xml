@@ -20,6 +20,7 @@
       <module>weatherserver</module>
       <module>weatherstation</module>
       <module>atdd</module>
+	  <module>docker-compose-integration-tests</module>
 	</modules>
 
 </project>
