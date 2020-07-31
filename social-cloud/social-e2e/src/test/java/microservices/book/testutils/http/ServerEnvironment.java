@@ -54,6 +54,7 @@ public class ServerEnvironment {
 				.getJarfile(PathUtil.getProjectRoot() + "/social-cloud/social-gateway/target");
 		String managementUrl = String.format("http://localhost:%d/actuator", port);
 		defaultArgs.add("--server.port=" + port);
+		defaultArgs.add("--run.profiles=test");
 		return new SpringApplicationWrapper(managementUrl, jarFilePath, defaultArgs);
 	}
 
