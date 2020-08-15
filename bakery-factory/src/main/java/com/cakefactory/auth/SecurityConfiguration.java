@@ -16,14 +16,15 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .oauth2Login().loginPage("/login").defaultSuccessUrl("/account").and()
                 .formLogin().loginPage("/login").and()
                 .authorizeRequests()
-                    .antMatchers("/account").authenticated()
+                    .antMatchers("/account/**").authenticated()
                     .anyRequest().permitAll();
     }
 

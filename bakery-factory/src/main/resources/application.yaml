@@ -5,3 +5,14 @@ spring:
     #    password: ${db.password}
     mustache:
         expose-request-attributes: true
+        
+    security:
+        oauth2:
+            client:
+                registration:
+                    facebook:
+                        client-id: 768544913908425
+                        client-secret: 9ea2a9085e6139443e9496dd89410d00
+                provider:
+                    facebook:
+                        user-name-attribute: email

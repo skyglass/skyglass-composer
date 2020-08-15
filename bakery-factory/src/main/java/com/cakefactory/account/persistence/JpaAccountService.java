@@ -18,6 +18,9 @@ class JpaAccountService implements AccountService {
 
     @Override
     public void register(String email, String password) {
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Password can't be null or empty");
+        }
         AccountEntity accountEntity = new AccountEntity();
         accountEntity.setEmail(email);
         accountEntity.setPassword(passwordEncoder.encode(password));
